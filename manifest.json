@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Spicetify-HideImages-Extension",
+    "description": "Spicetify extension to hide podcasts.",
+    "tags": ["hide", "image", "images", "cover art", "block", "blocker", "porn", "censor"]
+    "description": "Hide sexually explicit, bothersome, or any other images you want on Spotify.",
+    "preview": "https://i.imgur.com/C1w7oFG.png",
+    "main": "HideImages.js",
+    "readme": "readme.md",
+  },
+]
