@@ -2,6 +2,7 @@
 
 Hide sexually explicit, bothersome, or any other images you want from Spotify using this Spicetify extension.
 
+Also available on the [Spicetify Marketplace](https://github.com/spicetify/spicetify-marketplace).
 
 ## Usage:
 
