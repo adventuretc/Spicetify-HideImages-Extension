@@ -53,7 +53,7 @@ What is not implemented yet: (In my experience these are rarely bothersome but I
 
 ## The goal of the project:
 
-Have Spotify implement this same feature in their client.  
+Have Spotify implement this same feature in their client. Currently, you can disable playing back explicit-rated content wich blocks _every_ song that has swearwords and doesn't prevent displaying of the associated artwork which is a far cry from what this extension provides or what an option to filter sexually explicit cover arts would provide. Steam also has this feature, at least the latter. 
 
 ## Notes to self:
 
