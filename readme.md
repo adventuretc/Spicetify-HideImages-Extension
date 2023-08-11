@@ -8,13 +8,29 @@ Also available on the [Spicetify Marketplace](https://github.com/spicetify/spice
 
 Open the context menu at tracks, albums or artists and click on the menu item to throw them to the trashbin and never see their images again.
 
-What works:  
-Almost everything except these features which are not implemented yet: 
+What works: Almost everything.
+
+- the cover art of the currently playing track on the lower left. 
+- the cover art when you view an album. 
+- background images of artists. 
+- every cover art on artist overview pages except playlists. 
+- everything in the "Queue" view. 
+- everything in the "Recently played" view. 
+- the insides of a Playlist.
+- the highlighted song on the search page. 
+- the "Songs" tab of the search page. 
+- the "Albums", "Playlists" and "Artists" tabs of the Search page. 
+- The "Recent searches" section when you first click on the Search button.
+- the Home page.
+- on the "All" tab of the search page: "Artists", "Albums" rows, the track results on the right.
+- the "Fans also like" artist-lists on artist overview pages.
+
+What is not implemented yet: (In my experience these are rarely bothersome but I may do them later)
 
 - filtering of Discography pages, 
-- filtering of the Home page, 
 - filtering of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages),
-- the "Albums" and "Playlists" tabs of the Search page. 
+- on the "All" tab of the search page: "Playlists", "Featuring" rows, and the track results on the right.
+- the "Playlists" tab of the Search page. 
 
 There are no blocked images by default but you can import a default set of blocked images by importing the `default blocklist (importable at will).json` file in the extension's settings.
 
@@ -50,4 +66,8 @@ Have Spotify implement this same feature in their client.
 
 ## Misc:
 
-The theme in the screenshot is Bloom with the coffee color scheme.
+- The theme in the screenshot is Bloom with the coffee color scheme.
+- The code quality is 4.5/10, "it gets the job done". Would-be-nice list:
+	- refactor everything to have a method whose parameters are: selector to select parent element which contains both the url-containing element and the image-containing element, selector to select uri-containing element inside the parent, selector to select the image-containing element inside the parent, a delegated anonymous method to extract the uri from the uri-containing element, an enum constant or string to communicate whether this is an album, artist, playlist or what else (to know in which block list to look for the uri. Use `Spicetify.URI.Type.ALBUM`).
+	- have more code comments.
+	- remove old code pieces. 

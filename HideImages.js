@@ -256,6 +256,20 @@
 		// .main-playlistEditDetailsModal-albumCover,   /* ebben nem vagyok biztos hogy mi  */
 	document.body.appendChild(styleToHideCoverArtImages2);
 	
+	const styleToHideCoverArtImages3 = document.createElement("style");
+	styleToHideCoverArtImages3.innerHTML = `
+		
+		[pleaseHideThis="true"]
+		{
+			background-color: black;
+		}`;
+		// Ne hagyj vesszőt a CSS selector végén mert úgy nem fog működni. 
+		// .cover-art-image,     /* ebben nem vagyok biztos hogy mi  */
+		// .cover-art,            /* ebben nem vagyok biztos hogy mi  */
+		// .main-coverSlotExpanded-container,         /* ebben nem vagyok biztos hogy mi  */
+		// .main-playlistEditDetailsModal-albumCover,   /* ebben nem vagyok biztos hogy mi  */
+	document.body.appendChild(styleToHideCoverArtImages3);
+	
 	
 	
 	function sanitizePage()
@@ -302,7 +316,84 @@
 		// Function to process the element and remove "src" attribute
 	function processElement(element, pageType)
 	{
-		if (pageType == "tracklistview")
+		if (pageType == "The Artists row on the All tab of the Search page")
+		{
+			
+			// element is a ".main-card-card" 
+			
+			const artistLinks = element.querySelectorAll(".main-card-cardMetadata .main-cardHeader-link");
+			
+			for (const artistLink of artistLinks)
+			{
+				if (!artistLink.hasAttribute("href"))
+				{
+					return;
+				}
+				
+				const artistUri = "spotify:artist:" + artistLink.getAttribute("href").replace('/artist/', '');
+				
+				//console.log("DEBUG1 it works but: " + artistUri);
+				//console.log(element);
+				
+				if (trashArtistList[artistUri])
+				{
+					const imageToBeHiddenFallback = element.querySelector(".main-card-imageContainer");
+					
+					const imageToBeHidden = element.querySelector(".main-card-imageContainer img");
+					
+					if (imageToBeHidden)
+					{
+						imageToBeHidden.setAttribute("src", "");
+						imageToBeHidden.setAttribute("extensionProcessed", "true");
+					}
+					else if (imageToBeHiddenFallback.hasAttribute("extensionProcessed") == "false")
+					{
+						//imageToBeHiddenFallback.style.visibility = "hidden";
+						imageToBeHiddenFallback.setAttribute("extensionProcessed", "true");
+						imageToBeHiddenFallback.setAttribute("pleaseHideThis", "true");
+					}
+				}
+			}
+		}
+		else if (pageType == "The albums tab of the Search page")
+		{
+			
+			// element is a ".main-card-card" 
+			
+			const albumLinks = element.querySelectorAll(".main-card-cardMetadata .main-cardHeader-link");
+			
+			for (const albumLink of albumLinks)
+			{
+				if (!albumLink.hasAttribute("href"))
+				{
+					continue;
+				}
+				
+				const albumUri = "spotify:album:" + albumLink.getAttribute("href").replace('/album/', '');
+				
+				if (trashAlbumList.has(albumUri))
+				{
+					const imageToBeHiddenFallback = element.querySelector(".main-card-imageContainer");
+					
+					const imageToBeHidden = element.querySelector(".main-card-imageContainer img");
+					
+					if (imageToBeHidden)
+					{
+						imageToBeHidden.setAttribute("src", "");
+						imageToBeHidden.setAttribute("extensionProcessed", "true");
+					}
+					else if (imageToBeHiddenFallback.hasAttribute("extensionProcessed") == "false")
+					{
+						//imageToBeHiddenFallback.style.visibility = "hidden";
+						imageToBeHiddenFallback.setAttribute("extensionProcessed", "true");
+						imageToBeHiddenFallback.setAttribute("pleaseHideThis", "true");
+					}
+						
+					//console.log("Removed 'src' attribute from the element. uri: " + albumUri);
+				}
+			}
+		}
+		else if (pageType == "tracklistview")
 		{
 			//await sleep(1000);
 			
@@ -331,14 +422,15 @@
 				//element.classList.add("force-hide-image"); // ez működik de a Spotify azonnal eltávlítja szóval csak kb. 1 ms-ig marad rejtve a cover art. ez nem jó. -> ezt itt nem hívhatod meg mert végtelen loop-ba kerül.
 				element.setAttribute("src", "");
 				
-				console.log("Removed 'src' attribute from the element. uri: " + uri);
+				//console.log("Removed 'src' attribute from the element. uri: " + uri);
 			}
 		  
 		}
 		else if (pageType == "searchpagehighlightedresult")
 		{
 			//const albumLink = element;
-			const albumLink = document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link")[0];
+			//const albumLink = document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link")[0];
+			const albumLink = document.querySelectorAll(".search-searchResult-topResultCard .main-cardHeader-link")[0];
 			
 			
 			//await sleep(1000);
@@ -348,7 +440,7 @@
 			
 			if (!albumLink.hasAttribute("href"))
 			{
-				console.log("it works: href was not found, aborting searchpagehighlightedresult.");
+				//console.log(" href was not found, aborting searchpagehighlightedresult.");
 				return;
 			}
 			
@@ -356,7 +448,7 @@
 			// e.g.: href="/album/38xgBOLAcKoYWMSXWUDH1E?highlight=spotify:track:11xC6P3iKYpFThT6Ce1KdG"
 			const uri = "spotify:album:" + albumLink.getAttribute("href").split("?")[0].replace('/album/', '');
 			//console.log(uri);
-			console.log("it works: " + uri);
+			//console.log("it works: " + uri);
 			if (trashAlbumList.has(uri))
 			{
 				//albumLink.innerHTML = albumLink.innerHTML + " TO BE CENSORED";
@@ -365,16 +457,45 @@
 				
 				//element.classList.add("force-hide-image"); // ez működik de a Spotify azonnal eltávlítja szóval csak kb. 1 ms-ig marad rejtve a cover art. ez nem jó. -> ezt itt nem hívhatod meg mert végtelen loop-ba kerül.
 				
-				const cardimage = element.parentElement.parentElement.querySelector(".main-cardImage-imageWrapper.main-card-hero .main-cardImage-image")
+			
+				const cardimage = element.querySelector(".main-cardImage-imageWrapper.main-card-hero .main-cardImage-image")
 				
 				if (cardimage)
 				{
 					cardimage.setAttribute("src", "");
-					console.log("Removed 'src' attribute from the element. uri: " + uri);
+					//console.log("Removed 'src' attribute from the element. uri: " + uri);
+				}
+				else
+				{
+					const cardimageFallback = element.querySelector(".main-cardImage-imageWrapper")
+					
+					cardimageFallback.style.visibility = "hidden";
+					
+					setTimeout(function()
+						{
+							cardimageFallback.style.visibility = "visible";
+						}
+					, 500);
+				}
+			}
+			
+			// e.g.: href="/artist/9823rhd298j
+			const artistUri = "spotify:artist:" + albumLink.getAttribute("href").replace('/artist/', '');
+			//console.log(uri);
+			//console.log("it works: " + artistUri);
+			if (trashArtistList[artistUri])
+			{
+				//element.classList.add("force-hide-image"); // ez működik de a Spotify azonnal eltávlítja szóval csak kb. 1 ms-ig marad rejtve a cover art. ez nem jó. -> ezt itt nem hívhatod meg mert végtelen loop-ba kerül.
+				
+				const imageToBeHidden = element.parentElement.parentElement.querySelector(".main-cardImage-imageWrapper.main-card-hero img.main-cardImage-image")
+				
+				if (imageToBeHidden)
+				{
+					imageToBeHidden.setAttribute("src", "");
+					//console.log("Removed 'src' attribute from the element. uri: " + artistUri);
 				}
 			}
 		}
-		
 		else if (pageType == "artistoverviewpage")
 		{
 			//a helyes selector az igazából ez: ".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link"
@@ -393,7 +514,7 @@
 			}
 			
 			
-			console.log("I will try to remove the 'src' attribute from the element. albumLink.getAttribute(href): " + albumLink.getAttribute("href") + " (context = artistoverviewpage)");
+			//console.log("I will try to remove the 'src' attribute from the element. albumLink.getAttribute(href): " + albumLink.getAttribute("href") + " (context = artistoverviewpage)");
 			
 			// e.g.: href="/album/38xgBOLAcKoYWMSXWUDH1E?highlight=spotify:track:11xC6P3iKYpFThT6Ce1KdG"
 			const uri = "spotify:album:" + albumLink.getAttribute("href").replace("/album/", "");
@@ -413,7 +534,7 @@
 				if (cardimage)
 				{
 					cardimage.setAttribute("src", "");
-					console.log("Removed 'src' attribute from the element. uri: " + uri);
+					//console.log("Removed 'src' attribute from the element. uri: " + uri);
 				}
 			}
 		}
@@ -433,7 +554,7 @@
 				//return;
 			//}
 			
-			console.log("I may remove the 'style' attribute from the element. topCover.getAttribute(href): " + topCover.getAttribute("href") + " (context = artistoverviewpage_top_background_image)");
+			//console.log("I may remove the 'style' attribute from the element. topCover.getAttribute(href): " + topCover.getAttribute("href") + " (context = artistoverviewpage_top_background_image)");
 			
 			//const uri = "spotify:album:" + topCover.getAttribute("href").replace("/album/", "");
 			//if (trashAlbumList.has(uri))
@@ -469,7 +590,7 @@
 				if (topCover)
 				{
 					topCover.setAttribute("style", "");
-					console.log("Removed 'style' attribute and so the background image from the element. uri: " + uri);
+					//console.log("Removed 'style' attribute and so the background image from the element. uri: " + artistUri);
 				}
 				
 				  //for (const element of targetElements)
@@ -491,12 +612,17 @@
 	function handleTargetElements(records, selector, pageType)
 	{
 		// I have tried everything i could and the lousy MutationObserver only calls the callback once even though it should after every single mutation on the page (which is dozens). There was no .disconnect command anywhere. It just doesnt work.  So I will rewrite the code to use actively called processing methods and only use MutationObserver for the tracklists wich is the only thing that seems to be handled well (possibly due to the selector being short, only having a single class).  The weird thing is, when i run the same selector in the console, after the page has loaded, it always works and returns 42 or so results. I'm talking about this one: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult"). But the same thing never works if inside the mutationobserver callback. It says selectorMatchesTheseElementsNodeList.length == 0 and it only gets called once per search-page load (which is erroneous).
+		//EDIT:
+		//I think I figured out what causes the problem:  MutationObserver works asynchronously and sometimes its collection period never ends I guess. 
+		//We have an array of MutationRecord because MutationObserver works asynchronously as it's more efficient this way. The callback will not be fired until the DOM has finished changing. So at a given time, all mutations will be “collected” in an array.2019. febr. 19.
+		//Listening to the DOM changes with MutationObserver - Medium
+		//medium.com
+		//https://medium.com › abbeal › listening-to-the-dom-cha...
+
 		
-		//await sleep (600);
-		 //795
-		//In JavaScript, I rewrite every function so that it can end as soon as possible. You want the browser back in control so it can make your DOM changes.
 		
-		//Every time I've wanted a sleep in the middle of my function, I refactored to use a setTimeout().
+		// "In JavaScript, I rewrite every function so that it can end as soon as possible. You want the browser back in control so it can make your DOM changes."
+		// "Every time I've wanted a sleep in the middle of my function, I refactored to use a setTimeout()."
 		
 		const selectorMatchesTheseElementsNodeList = document.querySelectorAll(selector);
 		{
@@ -508,7 +634,7 @@
 		}
 		if (selectorMatchesTheseElementsNodeList.length == 0)
 		{
-			console.log("[DEBUG] selectorMatchesTheseElements was empty. Selector was: "  + selector);
+			//console.log("[DEBUG] selectorMatchesTheseElements was empty. Selector was: "  + selector);
 			return;
 		}
 		
@@ -535,7 +661,6 @@
 			      
 				for (const node of record.addedNodes)
 				{
-					//if ((node.nodeType === Node.ELEMENT_NODE) && node.matches(selector))
 					if (node.nodeType === Node.ELEMENT_NODE)
 					{
 						//if ( node.matches(selector)) // There's a serious problem with the .matches method: It mathes elements locally, without a context, while I need them matched globally, in the context of the Document. The whatwg spec is not clear about this but suggests it matches locally. The MDN is even less clear about it.  My experience is clear that it matches locally.  
@@ -565,10 +690,22 @@
 			}
 			else if (record.type === "attributes")
 			{
-				if (record.attributeName != "src" && record.attributeName != "style") // discard this because I will modify src and it would get into an infinite recursive loop.
+		
+				const targetNode2 = record.target;
+				//if ((targetNode.nodeType === Node.ELEMENT_NODE)  && targetNode.matches(selector))
+				
+				//if ( Array.from(document.querySelectorAll(".main-card-card")).includes(targetNode2) )
+				//{
+					//if (targetNode2.innerHTML.includes("Artist name here"))
+					//{
+						//console.log("Debug2 works v3, Artist name here found");
+						
+						//record.target.innerHTML = "";
+					//}
+				//}
+				
+				if (record.attributeName != "src" && record.attributeName != "style" || (record.attributeName == "src" && record.target.getAttribute("src") != "" ) ) // discard this because I will modify src and it would get into an infinite recursive loop.
 				{
-						
-						
 					    //https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/target
 					    //MutationRecord: target property
 					    //The MutationRecord read-only property target is the target (i.e. the mutated/changed node) of a mutation observed with a MutationObserver.
@@ -651,10 +788,10 @@
 
 		 
 		// Process any existing elements on initial setup
-		for (const element of targetElements)
-		{
-			processElement(element, pageType);
-		}
+		//for (const element of targetElements)
+		//{
+			//processElement(element, pageType);
+		//}
 
 		// Set up a MutationObserver to monitor for changes to the DOM
 		const observer = new MutationObserver((mutationsList) =>
@@ -689,7 +826,7 @@
 
 		  
 		var container = document.documentElement || document.body;
-		console.log("DEBUG: container = " + container);
+		//console.log("DEBUG: container = " + container);
 		
 		observer.observe(container, { childList: true, subtree: true, attributes: true, characterData:true }); // ez nem jó mert a src attribútumot én megmásítom rajta és akkor végtelen loop-ba kerül ez a cucc. Más megoldás kéne. Vagy ignorálni kell a src változásokat. 
 		  
@@ -703,7 +840,24 @@
 		// Ami most jön az a search page-re vonatkozik de azon belül csak a kiemelt találatra.
 			waitForElement(".main-trackList-rowImage", "tracklistview");
 			
+			
 			document.documentElement.addEventListener("click", documentClickEventListener); // this is to be able to react to when the user presses a button on the search page and the DOM is updated. E.g. they she goes from "All" to "Playlists" and back. Without this, the newly loaded DOM would never be sanitized.
+			
+			
+
+			waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
+
+
+			waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage");
+
+			waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage"); // ezt igazából az album page-re használom most.
+
+			waitForElement(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
+
+			waitForElement(".main-card-card", "The Artists row on the All tab of the Search page");
+
+			waitForElement(".main-card-card", "The albums tab of the Search page");
+						
 			
 			//waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
 				//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
@@ -715,6 +869,26 @@
 				//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artistoverviewpage")} )
 			
 			//waitForElement(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
+	}
+	function documentKeyStrokeEventListener()
+	{
+		tryToSanitizePage();
+			
+		setTimeout(() =>
+		{
+			tryToSanitizePage();
+		}
+		, 500);
+		setTimeout(() =>
+		{
+			tryToSanitizePage();
+		}
+		, 1000);
+		setTimeout(() =>
+		{
+			tryToSanitizePage();
+		}
+		, 1500);
 	}
 	function documentClickEventListener()
 	{
@@ -738,7 +912,8 @@
 	}
 	function tryToSanitizePage()
 	{
-		processElementsBatch(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
+		//".search-searchResult-topResult" or:
+		processElementsBatch(".search-searchResult-topResultCard", "searchpagehighlightedresult");
 		
 		//waitForElement(", "");
 			//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
@@ -750,6 +925,11 @@
 			//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artistoverviewpage")} )
 		
 		processElementsBatch(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
+		
+		// The "Artists" row on the "All" tab of the Search page. 
+		processElementsBatch(".main-card-card", "The Artists row on the All tab of the Search page");
+		
+		processElementsBatch(".main-card-card", "The albums tab of the Search page");
 	}
 	function processElementsBatch(selector, pageType)
 	{
@@ -830,6 +1010,13 @@
 				tryToSanitizePage();
 			}
 			, 1500);
+			
+			
+			document.querySelectorAll(".main-topBar-searchBar input").forEach((e) =>  // this is the search bar at the top.
+			{
+				e.removeEventListener(documentKeyStrokeEventListener);
+				e.addEventListener("input", documentKeyStrokeEventListener); // this is to be able to react to when the user presses a button on the search page and the DOM is updated. E.g. they she goes from "All" to "Playlists" and back. Without this, the newly loaded DOM would never be sanitized.
+			});
 		}
 		else
 		if (data.path.startsWith("/artist"))
@@ -910,7 +1097,33 @@
 		else
 		{
 			document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
+			
+			tryToSanitizePage();
+			
+			setTimeout(() =>
+			{
+				tryToSanitizePage();
+			}
+			, 500);
+			setTimeout(() =>
+			{
+				tryToSanitizePage();
+			}
+			, 1000);
+			setTimeout(() =>
+			{
+				tryToSanitizePage();
+			}
+			, 1500);
 		}
+		
+		if (data.path.startsWith("/search") == false)
+		{
+			// don't listen to keystrokes outside of the search page because it would just lag the app for no reason. 
+			document.documentElement.removeEventListener(documentKeyStrokeEventListener);
+		}
+		
+		
 		
 		// data.path érték példák:
 			// /queue
