@@ -9,6 +9,7 @@ Also available on the [Spicetify Marketplace](https://github.com/spicetify/spice
 Open the context menu at tracks, albums or artists and click on the menu item to throw them to the trashbin and never see their images again.
 
 There are no images blocked by default but you can import a default set of blocked images by opening the settings and clicking a button (top right menu -> "Hide-Arbitrary-Images Settings" -> "Import default blocklist" button.) or by manually importing the `default blocklist (importable at will).json` file, which is also done in the extension's settings. 
+The default blocklist contains about 288 entires, mostly naked or half-naked women (naked breasts, naked thighs (the boundary is 2 cm's above the knees), naked bottoms, naked vaginas (yes, really, you wouldn't believe) and naked waists or torsos).
 
 What works: Almost everything.
 
