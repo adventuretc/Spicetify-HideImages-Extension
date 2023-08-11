@@ -8,6 +8,8 @@ Also available on the [Spicetify Marketplace](https://github.com/spicetify/spice
 
 Open the context menu at tracks, albums or artists and click on the menu item to throw them to the trashbin and never see their images again.
 
+There are no images blocked by default but you can import a default set of blocked images by opening the settings and clicking a button (top right menu -> "Hide-Arbitrary-Images Settings" -> "Import default blocklist" button.) or by manually importing the `default blocklist (importable at will).json` file, which is also done in the extension's settings. 
+
 What works: Almost everything.
 
 - the cover art of the currently playing track on the lower left. 
@@ -33,8 +35,6 @@ What is not implemented yet: (In my experience these are rarely bothersome but I
 - the "popular tracks" on artist pages. 
 - the "Playlists" tab of the Search page. 
 - in the Home page's "Recently played" section if a _single track_ appears, it is not hidden even though the containing album is supposed to be hidden. 
-
-There are no blocked images by default but you can import a default set of blocked images by importing the `default blocklist (importable at will).json` file in the extension's settings.
 
 ## How to install: 
 
@@ -73,3 +73,4 @@ Have Spotify implement this same feature in their client.
 	- refactor everything to have a method whose parameters are: selector to select parent element which contains both the url-containing element and the image-containing element, selector to select uri-containing element inside the parent, selector to select the image-containing element inside the parent, a delegated anonymous method to extract the uri from the uri-containing element, an enum constant or string to communicate whether this is an album, artist, playlist or what else (to know in which block list to look for the uri. Use `Spicetify.URI.Type.ALBUM`).
 	- have more code comments.
 	- remove old code pieces. 
+	- remove outdated comments. 
