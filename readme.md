@@ -22,15 +22,17 @@ What works: Almost everything.
 - the "Albums", "Playlists" and "Artists" tabs of the Search page. 
 - The "Recent searches" section when you first click on the Search button.
 - the Home page.
-- on the "All" tab of the search page: "Artists", "Albums" rows, the track results on the right.
-- the "Fans also like" artist-lists on artist overview pages.
+- on the "All" tab of the search page: "Artists", "Albums" rows.
+- the "Fans also like" section on artist overview pages.
+- filtering of Discography pages.
 
 What is not implemented yet: (In my experience these are rarely bothersome but I may do them later)
 
-- filtering of Discography pages, 
-- filtering of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages),
+- removing the so called "photo" of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages),
 - on the "All" tab of the search page: "Playlists", "Featuring" rows, and the track results on the right.
+- the "popular tracks" on artist pages. 
 - the "Playlists" tab of the Search page. 
+- in the Home page's "Recently played" section if a _single track_ appears, it is not hidden even though the containing album is supposed to be hidden. 
 
 There are no blocked images by default but you can import a default set of blocked images by importing the `default blocklist (importable at will).json` file in the extension's settings.
 

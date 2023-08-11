@@ -234,6 +234,14 @@
 		}
 		`;
 	
+	const styleToHideBottomBackgroundImageOnArtistPage = document.createElement("style");
+	styleToHideBottomBackgroundImageOnArtistPage.innerHTML = `
+		button.artist-artistAbout-container.artist-artistAbout-backgroundImage
+		{
+			background-image: none !important;
+		}
+		`;
+	
 	const styleToHideCoverArtImageOnAnAlbumPage = document.createElement("style");
 	styleToHideCoverArtImageOnAnAlbumPage.innerHTML = `
 		.album-albumPage-sectionWrapper .main-entityHeader-image /* ez az album view-ban lévő main image-t kiválasztja  */
@@ -316,7 +324,48 @@
 		// Function to process the element and remove "src" attribute
 	function processElement(element, pageType)
 	{
-		if (pageType == "The Artists row on the All tab of the Search page")
+		if (pageType == "Handle the Discography page.")
+		{
+			// the parent element: ".artist-artistDiscography-headerContainer"
+						// the image containing element: ".artist-artistDiscography-headerImage img" -> the src and srcset attribute
+						// the album-uri containing element: ".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a" -> the href attribute
+			
+
+			const albumLinks = element.querySelectorAll(".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a");
+			
+			for (const albumLink of albumLinks)
+			{
+				if (!albumLink.hasAttribute("href"))
+				{
+					continue;
+				}
+				
+				const albumUri = "spotify:album:" + albumLink.getAttribute("href").replace('/album/', '');
+				
+				if (trashAlbumList.has(albumUri))
+				{
+					const imageToBeHiddenFallback = element.querySelector(".artist-artistDiscography-headerImage");
+					
+					const imageToBeHidden = element.querySelector(".artist-artistDiscography-headerImage img");
+					
+					if (imageToBeHidden)
+					{
+						imageToBeHidden.setAttribute("src", "");
+						imageToBeHidden.setAttribute("srcset", "");
+						imageToBeHidden.setAttribute("extensionProcessed", "true");
+					}
+					else if (imageToBeHiddenFallback.hasAttribute("extensionProcessed") == "false")
+					{
+						//imageToBeHiddenFallback.style.visibility = "hidden";
+						imageToBeHiddenFallback.setAttribute("extensionProcessed", "true");
+						imageToBeHiddenFallback.setAttribute("pleaseHideThis", "true");
+					}
+						
+					//console.log("Removed 'src' attribute from the element. uri: " + albumUri);
+				}
+			}
+		}
+		else if (pageType == "The Artists row on the All tab of the Search page")
 		{
 			
 			// element is a ".main-card-card" 
@@ -740,7 +789,19 @@
 			}
 			else if (record.type === "characterData")
 			{
-				console.log("DEBUG: " + record);
+				//console.log("DEBUG: " + record);
+				
+				const element =  record.target.parentElement;
+				
+				if (element)
+				{
+					if ( selectorMatchesTheseElements.includes(element) )
+					{
+						console.log("it works v5 " + selector);
+						
+						processElement(element, pageType);
+					}
+				}
 			}
 		}
 	}
@@ -857,7 +918,15 @@
 			waitForElement(".main-card-card", "The Artists row on the All tab of the Search page");
 
 			waitForElement(".main-card-card", "The albums tab of the Search page");
-						
+			
+			// Handle the Discography page.
+				// the parent element: ".artist-artistDiscography-headerContainer"
+				// the image containing element: ".artist-artistDiscography-headerImage img" -> the src and srcset attribute
+				// the album-uri containing element: ".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a" -> the href attribute
+			waitForElement(".artist-artistDiscography-headerContainer", "Handle the Discography page.");
+							
+							
+							
 			
 			//waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
 				//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
@@ -873,44 +942,40 @@
 	function documentKeyStrokeEventListener()
 	{
 		tryToSanitizePage();
-			
-		setTimeout(() =>
-		{
-			tryToSanitizePage();
-		}
-		, 500);
-		setTimeout(() =>
-		{
-			tryToSanitizePage();
-		}
-		, 1000);
-		setTimeout(() =>
-		{
-			tryToSanitizePage();
-		}
-		, 1500);
 	}
 	function documentClickEventListener()
 	{
 		tryToSanitizePage();
-			
-		setTimeout(() =>
-		{
-			tryToSanitizePage();
-		}
-		, 500);
-		setTimeout(() =>
-		{
-			tryToSanitizePage();
-		}
-		, 1000);
-		setTimeout(() =>
-		{
-			tryToSanitizePage();
-		}
-		, 1500);
 	}
+	
+	
+	// In my experience, the MutationObserver way of blocking images works 90% of the time but sometimes fails. To work around this, I use this manual enforced blocking as well. The MutationObserver way of blocking images I still keep however because in many cases it reacts faster and prevents the album art from flashing for a split second that I'd otherwise get. 
 	function tryToSanitizePage()
+	{
+		SanitizePage();
+		
+		setTimeout(() =>
+		{
+			SanitizePage();
+		}
+		, 100);
+		setTimeout(() =>
+		{
+			SanitizePage();
+		}
+		, 300);
+		setTimeout(() =>
+		{
+			SanitizePage();
+		}
+		, 900);
+		setTimeout(() =>
+		{
+			SanitizePage();
+		}
+		, 1800);
+	}
+	function SanitizePage()
 	{
 		//".search-searchResult-topResult" or:
 		processElementsBatch(".search-searchResult-topResultCard", "searchpagehighlightedresult");
@@ -930,6 +995,13 @@
 		processElementsBatch(".main-card-card", "The Artists row on the All tab of the Search page");
 		
 		processElementsBatch(".main-card-card", "The albums tab of the Search page");
+		
+		
+		// Handle the Discography page.
+			// the parent element: ".artist-artistDiscography-headerContainer"
+			// the image containing element: ".artist-artistDiscography-headerImage img" -> the src and srcset attribute
+			// the album-uri containing element: ".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a" -> the href attribute
+		processElementsBatch(".artist-artistDiscography-headerContainer", "Handle the Discography page.");
 	}
 	function processElementsBatch(selector, pageType)
 	{
@@ -955,7 +1027,7 @@
 	
 	Spicetify.Player.addEventListener("appchange", ({ data: data }) =>
 	{
-		console.log(data.path);
+		console.log("[info] URL aka data.path has changed: " + data.path);
 		
 		if (data.isEmbeddedApp === true) return;
 		// if (data.path !== "queue") return;
@@ -968,22 +1040,6 @@
 		if (data.path.startsWith("/playlist"))
 		{
 			tryToSanitizePage();
-			
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 500);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1000);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1500);
 		}
 		else
 		if (data.path.startsWith("/history"))
@@ -994,22 +1050,6 @@
 		if (data.path.startsWith("/search"))
 		{
 			tryToSanitizePage();
-			
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 500);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1000);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1500);
 			
 			
 			document.querySelectorAll(".main-topBar-searchBar input").forEach((e) =>  // this is the search bar at the top.
@@ -1022,23 +1062,6 @@
 		if (data.path.startsWith("/artist"))
 		{
 			tryToSanitizePage();
-			
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 500);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1000);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1500);
-			
 			
 			
 			const targetElements = document.querySelectorAll("main > section");
@@ -1053,10 +1076,12 @@
 			if (trashArtistList[artistUri])
 			{
 				document.body.appendChild(styleToHideTopBackgroundImageOnArtistPage);
+				document.body.appendChild(styleToHideBottomBackgroundImageOnArtistPage);
 			}
 			else
 			{
 				document.body.removeChild(styleToHideTopBackgroundImageOnArtistPage);
+				document.body.removeChild(styleToHideBottomBackgroundImageOnArtistPage);
 			}
 		}
 		else
@@ -1065,21 +1090,6 @@
 			// This is for the suggested similar albums section that appear at the bottom. 
 			tryToSanitizePage();
 			
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 500);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1000);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1500);
 			
 			
 			// this is for the main album image (the cover).
@@ -1100,21 +1110,6 @@
 			
 			tryToSanitizePage();
 			
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 500);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1000);
-			setTimeout(() =>
-			{
-				tryToSanitizePage();
-			}
-			, 1500);
 		}
 		
 		if (data.path.startsWith("/search") == false)
@@ -1130,9 +1125,15 @@
 			// /history
 			// /album/dasj9dasjasd234
 			// /artist/dasj9dasjasd234
+			// /artist/4kYSro6naA4h99UJvo89HB/discography/album
+				//this is the "discography" page (the event only fires if you change to this from a non /artist/ page e.g. the home page. )
 			// /playlist/dasj9dasjasd234
-			// /collection/tracks // ez a liked songs page.
+			// /collection/tracks 
+				// this is the "liked songs" page.
 			// /collection/local-files 
+			// /search
+			// /search/what you typed
+				// (the event only fires when you visit the Search page and then also when you start typing something, (only your first search), but not afterwards.)
 	
 	
 		// const uri = `spotify:artist:${data.uri.split(":")[3]}`;
@@ -1216,7 +1217,7 @@
 		async (self) => {
 			
 			let albumUri = Spicetify.Player.data.track.metadata["album_uri"];
-			console.log ("debug, albumUri: "+ albumUri);
+			//console.log ("debug, albumUri: "+ albumUri);
 			
 			let contains = trashAlbumList.has(albumUri);
 			let isBannedAlbum = contains;
