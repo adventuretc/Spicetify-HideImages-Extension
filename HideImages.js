@@ -449,7 +449,8 @@
 			
 			const parentRow = element.parentNode.parentNode.parentNode;
 
-			const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable > span > a");
+			//const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable > span > a");
+			const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable > span > span > a"); // from 2024-02-03 and on.
 			
 			if (!albumLink) // Sometimes this is null. So discard that. 
 			{
@@ -1026,41 +1027,52 @@
 	
 		// "appchange" when user changes page.
 	
-	Spicetify.Player.addEventListener("appchange", ({ data: data }) =>
+	
+	//Spicetify.Player.addEventListener("appchange", ({ data: data }) =>
+	Spicetify.Platform.History.listen((location) =>
 	{
-		console.log("[info] URL aka data.path has changed: " + data.path);
+		// Log the current pathname every time the user navigates to a new page.
+		console.log(location.pathname);
 		
-		if (data.isEmbeddedApp === true) return;
-		// if (data.path !== "queue") return;
+		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.uri
+		// és
+		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.url
+		// ne, várj, ez nem jó, ez a jelenleg szóló zenéről szól, nem a jelenlegi lapról.
 		
-		if (data.path.startsWith("/queue"))
+		console.log("[info] URL aka location.pathname has changed: " + location.pathname);
+			// 2024-02-02 ez soha nem kerül meghívásra, és ez hibát jelez számomra.
+		
+		//if (data.isEmbeddedApp === true) return;
+		// if (location.pathname !== "queue") return;
+		
+		if (location.pathname.startsWith("/queue"))
 		{
 			//sanitizePage();
 		}
 		else
-		if (data.path.startsWith("/playlist"))
+		if (location.pathname.startsWith("/playlist"))
 		{
 			tryToSanitizePage();
 		}
 		else
-		if (data.path.startsWith("/history"))
+		if (location.pathname.startsWith("/history"))
 		{
 			//sanitizePage();
 		}
 		else
-		if (data.path.startsWith("/search"))
+		if (location.pathname.startsWith("/search"))
 		{
 			tryToSanitizePage();
 			
 			
 			document.querySelectorAll(".main-topBar-searchBar input").forEach((e) =>  // this is the search bar at the top.
 			{
-				e.removeEventListener(documentKeyStrokeEventListener);
+				e.removeEventListener("input", documentKeyStrokeEventListener);
 				e.addEventListener("input", documentKeyStrokeEventListener); // this is to be able to react to when the user presses a button on the search page and the DOM is updated. E.g. they she goes from "All" to "Playlists" and back. Without this, the newly loaded DOM would never be sanitized.
 			});
 		}
 		else
-		if (data.path.startsWith("/artist"))
+		if (location.pathname.startsWith("/artist"))
 		{
 			tryToSanitizePage();
 			
@@ -1086,7 +1098,7 @@
 			}
 		}
 		else
-		if (data.path.startsWith("/album"))
+		if (location.pathname.startsWith("/album"))
 		{
 			// This is for the suggested similar albums section that appear at the bottom. 
 			tryToSanitizePage();
@@ -1094,7 +1106,7 @@
 			
 			
 			// this is for the main album image (the cover).
-			const uri = "spotify:album:" + data.path.replace('/album/', '');
+			const uri = "spotify:album:" + location.pathname.replace('/album/', '');
 			//const uri = `spotify:artist:${data.uri.split(":")[3]}`;
 			if (trashAlbumList.has(uri))
 			{
@@ -1113,15 +1125,15 @@
 			
 		}
 		
-		if (data.path.startsWith("/search") == false)
+		if (location.pathname.startsWith("/search") == false)
 		{
 			// don't listen to keystrokes outside of the search page because it would just lag the app for no reason. 
-			document.documentElement.removeEventListener(documentKeyStrokeEventListener);
+			document.documentElement.removeEventListener("input", documentKeyStrokeEventListener);
 		}
 		
 		
 		
-		// data.path érték példák:
+		// location.pathname érték példák:
 			// /queue
 			// /history
 			// /album/dasj9dasjasd234
@@ -1139,7 +1151,7 @@
 	
 		// const uri = `spotify:artist:${data.uri.split(":")[3]}`;
 		
-		//Spicetify.showNotification(data.path);
+		//Spicetify.showNotification(location.pathname);
 		
 		
 		
@@ -1151,7 +1163,7 @@
 		//case Type.LOCAL_ARTIST:
 		//case Type.LOCAL_ALBUM:
 		//case Type.ALBUM:
-			//Spicetify.showNotification(data.path);
+			//Spicetify.showNotification(location.pathname);
 		//case Type.ARTIST:
 		//case Type.PLAYLIST:
 		//case Type.PLAYLIST_V2:
@@ -1172,7 +1184,7 @@
 	
 	//Spicetify.Player.addEventListener("appchange", (event) =>
 	//{
-		//console.log(event.data.path);
+		//console.log(event.location.pathname);
 		
 		// console.log(event.data.URI.Type.TRACK);
 		// console.log(event.data.URI.Type.TRACK);
@@ -1185,7 +1197,7 @@
 		// https://github.com/HenryNguyen5/spicetify-cli/blob/674ecd66c07edb2b261dfb27709822e0a4ff821e/Extensions/trashbin.js#L136
 		 //Spicetify.showNotification(currentURI);
 		// vagy:
-		// event.data.path // App href path
+		// event.location.pathname // App href path
 		
 	//});
 		
@@ -1219,7 +1231,7 @@
 		trashbinIcon,
 		async (self) => {
 			
-			let albumUri = Spicetify.Player.data.track.metadata["album_uri"];
+			let albumUri =Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.metadata["album_uri"];
 			//console.log ("debug, albumUri: "+ albumUri);
 			
 			let contains = trashAlbumList.has(albumUri);
@@ -1227,7 +1239,7 @@
 			
 			let meta = await fetchAlbum(albumUri); // WIP
 		
-			//const uri = Spicetify.Player.data.track.uri;
+			//const uri = Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.metadata.uri;
 			//const uriObj = Spicetify.URI.fromString(uri);
 			//const type = uriObj.type;
 
@@ -1279,8 +1291,8 @@
 	putDataLocal();
 	refreshEventListeners(trashbinStatus);
 	setWidgetState(
-		trashSongList[Spicetify.Player.data.track.uri],
-		Spicetify.URI.fromString(Spicetify.Player.data.track.uri).type !== Spicetify.URI.Type.TRACK
+		trashSongList[Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.uri],
+		Spicetify.URI.fromString(Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.uri).type !== Spicetify.URI.Type.TRACK
 	);
 	
 	new Spicetify.ContextMenu.Item(
@@ -1418,18 +1430,25 @@
 	}
 
 	function watchChange() {
-		const data = Spicetify.Player.data || Spicetify.Queue;
-		if (!data) return;
+		const contextTrack = Spicetify.Platform.PlayerAPI._queue._queue.track?.contextTrack || Spicetify.Queue.track?.contextTrack;
+		//const data = Spicetify.Platform.PlayerAPI._queue || Spicetify.Queue;
+		// outdated: const data = Spicetify.Player.data || Spicetify.Queue;
+		if (!contextTrack) return;
 		
 		
 
-		let albumUri = data.track.metadata["album_uri"];
+		//let track = data.track;
+		//if (!track) return;
+		//let albumUri = track.metadata["album_uri"];
+		//let track = data.track.contextTrack;
+		//if (!track) return;
+		let albumUri = contextTrack.metadata["album_uri"];
 		let contains = trashAlbumList.has(albumUri);
 		let isBannedAlbum = contains;
 		
 		
-		const isBanned = trashSongList[data.track.uri] || isBannedAlbum;
-		setWidgetState(isBanned, Spicetify.URI.fromString(data.track.uri).type !== Spicetify.URI.Type.TRACK);
+		const isBanned = trashSongList[contextTrack.uri] || isBannedAlbum;
+		setWidgetState(isBanned, Spicetify.URI.fromString(contextTrack.uri).type !== Spicetify.URI.Type.TRACK);
 
 		// if (userHitBack) {
 			// userHitBack = false;
@@ -1486,7 +1505,7 @@
 	 * @returns {boolean}
 	 */
 	function shouldSkipCurrentTrack(uri, type) {
-		const curTrack = Spicetify.Player.data.track;
+		const curTrack = Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.metadata;
 		if (type === Spicetify.URI.Type.TRACK) {
 			if (uri === curTrack.uri) {
 				return true;
@@ -1525,11 +1544,11 @@
 			//if (shouldSkipCurrentTrack(uri, type)) 
 				//Spicetify.Player.next();
 				
-			Spicetify.Player.data?.track.uri === uri && setWidgetState(true);
+			Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack?.uri === uri && setWidgetState(true);
 			Spicetify.showNotification(type === Spicetify.URI.Type.TRACK ? "Song added to trashbin" : "Artist added to trashbin");
 		} else {
 			delete list[uri];
-			Spicetify.Player.data?.track.uri === uri && setWidgetState(false);
+			Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack?.uri === uri && setWidgetState(false);
 			Spicetify.showNotification(type === Spicetify.URI.Type.TRACK ? "Song removed from trashbin" : "Artist removed from trashbin");
 		}
 
