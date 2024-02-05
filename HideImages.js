@@ -66,7 +66,7 @@
 			const state = slider.classList.contains("disabled");
 			slider.classList.toggle("disabled");
 			Spicetify.LocalStorage.set(name, state);
-			console.log(name, state);
+			//console.log(name, state);
 			callback(state);
 		};
 
@@ -487,7 +487,7 @@
 			//await sleep(1000);
 			
 			
-			console.log("I may remove (context = searchpagehighlightedresult) the  'src' attribute from the element. albumLink.getAttribute(href): " + albumLink.getAttribute("href"));
+			//console.log("I may remove (context = searchpagehighlightedresult) the  'src' attribute from the element. albumLink.getAttribute(href): " + albumLink.getAttribute("href"));
 			
 			if (!albumLink.hasAttribute("href"))
 			{
@@ -720,7 +720,7 @@
 						if (selectorMatchesTheseElements.includes(node) )
 						//if (true)
 						{
-							console.log("it works v2 " + selector);
+							//console.log("it works v2 " + selector);
 							  // Process the element
 							
 							processElement(node, pageType);
@@ -732,7 +732,7 @@
 					else if ((node.nodeType === Node.ATTRIBUTE_NODE)  && selectorMatchesTheseElements.includes(node.ownerElement))
 					//else if (true)
 					{
-						console.log("it works v4 " + selector);
+						//console.log("it works v4 " + selector);
 						//Process the element
 						
 						processElement(node.ownerElement, pageType);
@@ -771,7 +771,7 @@
 						//if ((targetNode.nodeType === Node.ELEMENT_NODE)  && targetNode.matches(selector))
 						if ( selectorMatchesTheseElements.includes(targetNode) )
 						{
-							console.log("it works v3 " + selector);
+							//console.log("it works v3 " + selector);
 							// Process the element
 							
 							//setTimeout(processElement(targetNode, pageType),1000);
@@ -799,7 +799,7 @@
 				{
 					if ( selectorMatchesTheseElements.includes(element) )
 					{
-						console.log("it works v5 " + selector);
+						//console.log("it works v5 " + selector);
 						
 						processElement(element, pageType);
 					}
@@ -809,10 +809,8 @@
 	}
 
 
-     
-
-		//I have used it in several projects.
-
+		// snippet from the internet:
+		// "I have used it in several projects."
 		//function waitForElm(selector) {
 		    //return new Promise(resolve => {
 			//if (document.querySelector(selector)) {
@@ -1032,15 +1030,14 @@
 	Spicetify.Platform.History.listen((location) =>
 	{
 		// Log the current pathname every time the user navigates to a new page.
-		console.log(location.pathname);
+		//console.log(location.pathname);
 		
 		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.uri
 		// és
 		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.url
 		// ne, várj, ez nem jó, ez a jelenleg szóló zenéről szól, nem a jelenlegi lapról.
 		
-		console.log("[info] URL aka location.pathname has changed: " + location.pathname);
-			// 2024-02-02 ez soha nem kerül meghívásra, és ez hibát jelez számomra.
+		//console.log("[info] URL aka location.pathname has changed: " + location.pathname);
 		
 		//if (data.isEmbeddedApp === true) return;
 		// if (location.pathname !== "queue") return;
@@ -1186,7 +1183,6 @@
 	//{
 		//console.log(event.location.pathname);
 		
-		// console.log(event.data.URI.Type.TRACK);
 		// console.log(event.data.URI.Type.TRACK);
 		
 		
