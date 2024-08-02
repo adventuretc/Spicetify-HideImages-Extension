@@ -243,9 +243,11 @@
 		}
 		`;
 	
+	//A 2024-08-02-es updatekor megváltozott a helyes selector.
+	//.album-albumPage-sectionWrapper .main-entityHeader-image /* ez az album view-ban lévő main image-t kiválasztja  */
 	const styleToHideCoverArtImageOnAnAlbumPage = document.createElement("style");
 	styleToHideCoverArtImageOnAnAlbumPage.innerHTML = `
-		.album-albumPage-sectionWrapper .main-entityHeader-image /* ez az album view-ban lévő main image-t kiválasztja  */
+		.main-entityHeader-imageContainer .main-entityHeader-image /* ez az album view-ban lévő main image-t kiválasztja  */
 		{
 			display: none !important;
 		}`;
@@ -280,10 +282,10 @@
 	document.body.appendChild(styleToHideCoverArtImages3);
 	
 	
-	
+
+	//Ez egy outdated fv és semmire nem használom:	
 	function sanitizePage()
 	{
-	
 			//ezt fogod kapni:
 			//{
 				//<div class="main-trackList-rowSectionVariable" role="gridcell" aria-colindex="3" tabindex="-1"><span data-encore-id="type" class="Type__TypeElement-sc-goli3j-0 TypeElement-mesto-type"><a draggable="true" class="standalone-ellipsis-one-line" dir="auto" href="/album/4PEATKNNKmWcSoRLyVQDRS" tabindex="-1">I Know</a></span></div>
@@ -294,7 +296,7 @@
 			albumLinks.forEach((userItem) =>
 			{
 				const uri = "spotify:album:" + userItem.getAttribute("href").replace('/album/', '');
-				//const uri = `spotify:artist:${data.uri.split(":")[3]}`;
+				// − const uri = `spotify:artist:${data.uri.split(":")[3]}`;
 				if (trashAlbumList.has(uri))
 				{
 					//userItem.innerHTML = userItem.innerHTML + " TO BE CENSORED";
@@ -312,7 +314,6 @@
 							row.setAttribute("src", "");
 						}
 					});
-					
 				}
 				else
 				{
@@ -450,7 +451,8 @@
 			const parentRow = element.parentNode.parentNode.parentNode;
 
 			//const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable > span > a");
-			const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable > span > span > a"); // from 2024-02-03 and on.
+			//const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable span a"); // from 2024-02-03 and on.
+			const albumLink = parentRow.querySelector("div.main-trackList-rowSectionVariable span a"); // from 2024-08-02 and on.
 			
 			if (!albumLink) // Sometimes this is null. So discard that. 
 			{
@@ -547,7 +549,7 @@
 				}
 			}
 		}
-		else if (pageType == "artistoverviewpage")
+		else if (pageType == "artist over view page or album page")
 		{
 			//a helyes selector az igazából ez: ".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link"
 			
@@ -555,15 +557,12 @@
 		
 			//await sleep(1000);
 			
-			
 			const albumLink = element;
-			
 			
 			if (!albumLink.hasAttribute("href"))
 			{
 				return;
 			}
-			
 			
 			//console.log("I will try to remove the 'src' attribute from the element. albumLink.getAttribute(href): " + albumLink.getAttribute("href") + " (context = artistoverviewpage)");
 			
@@ -580,7 +579,7 @@
 				//element.classList.add("force-hide-image"); // ez működik de a Spotify azonnal eltávlítja szóval csak kb. 1 ms-ig marad rejtve a cover art. ez nem jó. -> ezt itt nem hívhatod meg mert végtelen loop-ba kerül.
 				
 				//úgy kell hogy 
-				const cardimage = albumLink.parentElement.parentElement.querySelector(".main-cardImage-image")
+				const cardimage = albumLink.parentElement.parentElement.parentElement.querySelector(".main-card-imageContainer img")
 				
 				if (cardimage)
 				{
@@ -741,7 +740,6 @@
 			}
 			else if (record.type === "attributes")
 			{
-		
 				const targetNode2 = record.target;
 				//if ((targetNode.nodeType === Node.ELEMENT_NODE)  && targetNode.matches(selector))
 				
@@ -845,8 +843,7 @@
 	// Recursive function to wait for the element and process it
 	function waitForElement(selector, pageType)
 	{
-		const targetElements = document.querySelectorAll(selector);
-
+		//const targetElements = document.querySelectorAll(selector);
 		 
 		// Process any existing elements on initial setup
 		//for (const element of targetElements)
@@ -909,9 +906,11 @@
 			waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
 
 
-			waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage");
+			//2024-08-02 előttig:
+			//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page");
+			waitForElement("a.Gi6Lr1whYBA2jutvHvjQ", "artist over view page or album page");
 
-			waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage"); // ezt igazából az album page-re használom most.
+			waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
 
 			waitForElement(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
 
@@ -931,11 +930,11 @@
 			//waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
 				//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
 				
-			//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage");
-				//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artistoverviewpage")} )
+			//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page");
+				//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
 
-			//waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage"); // ezt igazából az album page-re használom most.
-				//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artistoverviewpage")} )
+			//waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
+				//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
 			
 			//waitForElement(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
 	}
@@ -983,11 +982,12 @@
 		//waitForElement(", "");
 			//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
 			
-		processElementsBatch(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage");
-			//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artistoverviewpage")} )
+		//processElementsBatch(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page");
+		processElementsBatch("a.Gi6Lr1whYBA2jutvHvjQ", "artist over view page or album page");
+			//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
 
-		processElementsBatch("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artistoverviewpage"); // ezt igazából az album page-re használom most.
-			//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artistoverviewpage")} )
+		processElementsBatch("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
+			//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
 		
 		processElementsBatch(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
 		
@@ -1174,8 +1174,6 @@
 	      //}
 	});
 	
-	//document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link")
-		//-> ez még működik, de más nem. Ez 48 node-ot ad vissza.
 	
 	
 	
@@ -1230,8 +1228,7 @@
 			let albumUri =Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.metadata["album_uri"];
 			//console.log ("debug, albumUri: "+ albumUri);
 			
-			let contains = trashAlbumList.has(albumUri);
-			let isBannedAlbum = contains;
+			let isBannedAlbum = trashAlbumList.has(albumUri);
 			
 			let meta = await fetchAlbum(albumUri); // WIP
 		
@@ -1439,8 +1436,7 @@
 		//let track = data.track.contextTrack;
 		//if (!track) return;
 		let albumUri = contextTrack.metadata["album_uri"];
-		let contains = trashAlbumList.has(albumUri);
-		let isBannedAlbum = contains;
+		let isBannedAlbum = trashAlbumList.has(albumUri);
 		
 		
 		const isBanned = trashSongList[contextTrack.uri] || isBannedAlbum;
