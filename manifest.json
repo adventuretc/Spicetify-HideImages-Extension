@@ -1,6 +1,6 @@
 [
   {
-    "name": "Spicetify-HideImages-Extension",
+    "name": "Censor / Block / Filter / Hide Covert Art / Images",
     "description": "Hide any arbitrary image inside Spotify (sexually explicit, bothersome, or any other images you want).",
     "preview": "https://i.imgur.com/C1w7oFG.png",
     "main": "HideImages.js",
