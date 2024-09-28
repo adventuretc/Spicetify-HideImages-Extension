@@ -1461,7 +1461,6 @@
 			setTimeout(() => {
 				document.body.removeChild(styleToHideNowPlayingTrackCoverArtImage);
 			}, 500);
-			
 		}
 		
 		

@@ -6,3 +6,6 @@
 git push origin main
 # vagy
 git push -u origin main
+
+echo "all done"
+read x;
