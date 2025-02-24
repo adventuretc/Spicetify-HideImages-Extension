@@ -161,7 +161,7 @@
 		
 		content.appendChild(createSlider("hideimages-enabled", "Enabled", trashbinStatus, refreshEventListeners));
 		content.appendChild(
-			createSlider("TrashbinWidgetIcon", "Show Widget Icon", enableWidget, state =>
+			createSlider("HideImagesWidgetIcon", "Show Widget Icon", enableWidget, state =>
 			{
 				enableWidget = state;
 				state && trashbinStatus ? widget.register() : widget.deregister();
@@ -282,7 +282,7 @@
 	
 	// Settings Variables - Initial Values
 	let trashbinStatus = initValue("hideimages-enabled", true);
-	let enableWidget = initValue("TrashbinWidgetIcon", true);
+	let enableWidget = initValue("HideImagesWidgetIcon", true);
 	
 	// Settings Menu Initialization
 	const content = document.createElement("div");
@@ -1828,7 +1828,7 @@
 				suggestedName: "hide-images 1.json",
 				types: [
 					{
-						description: "Spicetify trashbin backup",
+						description: "Spicetify HideImages backup",
 						accept: {
 							"application/json": [".json"],
 						},
