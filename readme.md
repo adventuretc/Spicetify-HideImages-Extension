@@ -51,11 +51,18 @@ What is not implemented yet: (In my experience these are rarely bothersome but I
 ## Known bugs:
 
 - The Queue view always hides all cover arts.
+- Can't hide artist top banners (the CSS selector is outdated).
+- Can't hide artist bottom banners (the CSS selector is outdated).
+- Can't hide artist profile pictures (the CSS selector is outdated).
 - Right clicking and blocking a song will add the song to the trashbin whereas it's supposed to add the album to the trashbin. It will display the message "Song added to trashbin". Pressing the trash _icon_ (next to the song's name) works correctly, however. 
 
 ## The goal of the project:
 
 Have Spotify implement this same feature in their client. Currently, you can disable playing back explicit-rated content wich blocks _every_ song that has swearwords and doesn't prevent displaying of the associated artwork which is a far cry from what this extension provides or what an option to filter sexually explicit cover arts would provide. Steam also has this feature, at least the latter. 
+
+## Contributions:
+
+Contributions are welcome.
 
 ## Notes to self:
 
