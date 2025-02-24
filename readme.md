@@ -67,6 +67,12 @@ Have Spotify implement this same feature in their client. Currently, you can dis
 
 `chromium-browser "chrome://inspect/"`
 
+## How to update the source code if it breaks:
+
+Since this is a fork of trashbin.js and that one is a lot better maintained, just check out what they are up to.
+
+https://github.com/spicetify/cli/commits/main/Extensions/trashbin.js
+
 ## Misc:
 
 - The theme in the screenshot is Bloom with the coffee color scheme.
