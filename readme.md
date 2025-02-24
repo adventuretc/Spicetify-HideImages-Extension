@@ -73,6 +73,10 @@ Since this is a fork of trashbin.js and that one is a lot better maintained, jus
 
 https://github.com/spicetify/cli/commits/main/Extensions/trashbin.js
 
+Some tools I used:
+
+https://jsonformatter.curiousconcept.com/
+
 ## Misc:
 
 - The theme in the screenshot is Bloom with the coffee color scheme.
