@@ -50,10 +50,11 @@ What is not implemented yet: (In my experience these are rarely bothersome but I
 
 ## Known bugs:
 
-- The Queue view always hides all cover arts.
+- Album covers loaded after scrolling down on a Discography page of an Artist don't get filtered.
 - Can't hide artist top banners (the CSS selector is outdated).
 - Can't hide artist bottom banners (the CSS selector is outdated).
 - Can't hide artist profile pictures (the CSS selector is outdated).
+- // The Queue view always hides all cover arts. -> Seems not to occur in prod. Does it?
 - Right clicking and blocking a song will add the song to the trashbin whereas it's supposed to add the album to the trashbin. It will display the message "Song added to trashbin". Pressing the trash _icon_ (next to the song's name) works correctly, however. 
 
 ## The goal of the project:
