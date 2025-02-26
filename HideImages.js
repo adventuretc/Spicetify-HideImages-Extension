@@ -1570,10 +1570,10 @@
 		return res.artists.items.map(item => item?.profile?.name || "Unknown Artist").join(", "); // E.g. "Eminem, Another Artist, Third Artist".
 	}
 	
-	function refreshEventListeners(state)
+	function refreshEventListeners(enabled)
 	{
-		trashbinStatus = state;
-		if (state)
+		trashbinStatus = enabled;
+		if (enabled)
 		{
 			Spicetify.Player.addEventListener("songchange", watchChange);
 			enableWidget && widget.register();

@@ -4,6 +4,9 @@ Hide sexually explicit, bothersome, or any other arbitrary image you'd like in t
 
 Also available on the [Spicetify Marketplace](https://github.com/spicetify/spicetify-marketplace).
 
+
+![Preview](extension preview 1.webp "Preview")
+
 ## Usage:
 
 Open the context menu at tracks, albums or artists and click on the menu item to throw them to the trashbin and never see their images again.
@@ -88,7 +91,7 @@ https://jsonformatter.curiousconcept.com/
 
 ## Misc:
 
-- The theme in the screenshot is Bloom with the coffee color scheme.
+- The theme in the brown screenshot is Bloom with the coffee color scheme.
 - The code quality is 4.5/10, "it gets the job done". Would-be-nice list:
 	- refactor everything to have a method whose parameters are: selector to select parent element which contains both the url-containing element and the image-containing element, selector to select uri-containing element inside the parent, selector to select the image-containing element inside the parent, a delegated anonymous method to extract the uri from the uri-containing element, an enum constant or string to communicate whether this is an album, artist, playlist or what else (to know in which block list to look for the uri. Use `Spicetify.URI.Type.ALBUM`).
 	- have more code comments.
