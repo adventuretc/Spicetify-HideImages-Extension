@@ -12,6 +12,7 @@ retVal=$?
 
 if [[ retVal ]]; then
 	# command returned 0 (0 = true, bashism)
+	sleep 2s
 	exit 0
 else
 	# command returned some error
