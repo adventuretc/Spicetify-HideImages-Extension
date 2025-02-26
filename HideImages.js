@@ -620,7 +620,9 @@
 			// Ez kiválasztja az artist overview page-eken lévő albumokat, pontosabban azt az elemet amiben a link van az albumra, a href tartalmazza a link URL-t.  Ha a href rossz akkor hide this.
 			
 			
-			const topCover = element; //  (".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
+			const topCoverOld = element;
+			const topCoverNew = document.querySelectorAll('[data-testid="background-image"]')[0];
+			//data-testid="background-image"
 			
 			//if (!topCover.hasAttribute("href"))
 			//{
@@ -647,7 +649,7 @@
 			
 			const artistUri = targetElements[0].getAttribute("data-test-uri"); // gives "spotify:artist:181bsRPaVXVlUKXrxwZfHK"
 			
-			
+			console.debug ("artistUri: " + artistUri);
 			//if (true)
 			if (trashArtistList[artistUri])
 			{
@@ -660,9 +662,16 @@
 				//const targetElements = topCover.querySelectorAll(selector);
 				
 				// Process any existing elements on initial setup
-				if (topCover)
+				if (topCoverNew)
 				{
-					topCover.setAttribute("style", "");
+					topCoverNew.setAttribute("style", "");
+					//topCover.style.height = "100px";
+					//console.log("Removed 'style' attribute and so the background image from the element. uri: " + artistUri);
+				}
+				if (topCoverOld)
+				{
+					topCoverOld.setAttribute("style", "");
+					//topCover.style.height = "100px";
 					//console.log("Removed 'style' attribute and so the background image from the element. uri: " + artistUri);
 				}
 				
@@ -1016,7 +1025,8 @@
 		processElementsBatch("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
 		//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
 		
-		processElementsBatch(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
+		processElementsBatch(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image"); // This was good prior to Spotify v1.2.53.440.g7b2f582a
+		processElementsBatch(".main-entityHeader-withBackgroundImage", "artistoverviewpage_top_background_image"); // This is for Spotify from v1.2.53.440.g7b2f582a
 		
 		// The "Artists" row on the "All" tab of the Search page.
 		processElementsBatch(".main-card-card", "The Artists row on the All tab of the Search page");
