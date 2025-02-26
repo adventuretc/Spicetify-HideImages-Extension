@@ -4,8 +4,7 @@ Hide sexually explicit, bothersome, or any other arbitrary image you'd like in t
 
 Also available on the [Spicetify Marketplace](https://github.com/spicetify/spicetify-marketplace).
 
-
-![Preview](./extension preview 1.webp)
+![Preview](./extension%20preview%201.webp "Preview")
 
 ## Usage:
 
