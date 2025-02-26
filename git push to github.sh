@@ -5,7 +5,16 @@
 
 git push origin main
 # vagy
-git push -u origin main
+# git push -u origin main
 
-echo "all done"
-read x;
+
+retVal=$?
+
+if [[ retVal ]]; then
+	# command returned 0 (0 = true, bashism)
+	exit 0
+else
+	# command returned some error
+	echo "●●● An error occured. ●●●"
+	read x;
+fi

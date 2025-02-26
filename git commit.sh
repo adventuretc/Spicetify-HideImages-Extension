@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/fish
 
 git add .
-git commit .
+git status
+git commit . -m .
