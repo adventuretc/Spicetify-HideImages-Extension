@@ -317,20 +317,20 @@
 			display: none !important;
 		}`;
 	
-	// Hide all other song images continuously. (album view main album image, playlist view main image)
-	const styleToHideCoverArtImages2 = document.createElement("style");
-	styleToHideCoverArtImages2.innerHTML = `
+	// I remove this for now because I don't use it.
+	//const styleToHideCoverArtImages2 = document.createElement("style");
+	//styleToHideCoverArtImages2.innerHTML = `
 		
-		.main-trackList-rowSectionStart .main-trackList-rowImage.force-hide-image  /* ebben biztos vagyok hogy a Queue és hasonló track list view-kban ez kiválasztja a cover art képet. Ezeket permanens módon elrejtem amíg nincs rá jobb megoldás.  */
-		{
-			display: none !important;
-		}`;
+		//.main-trackList-rowSectionStart .main-trackList-rowImage.force-hide-image  /* ebben biztos vagyok hogy a Queue és hasonló track list view-kban ez kiválasztja a cover art képet. Ezeket permanens módon elrejtem amíg nincs rá jobb megoldás (csak ha a force-hide-image class rajta van). */
+		//{
+			//display: none !important;
+		//}`;
 	// Ne hagyj vesszőt a CSS selector végén mert úgy nem fog működni.
 	// .cover-art-image,     /* ebben nem vagyok biztos hogy mi  */
 	// .cover-art,            /* ebben nem vagyok biztos hogy mi  */
 	// .main-coverSlotExpanded-container,         /* ebben nem vagyok biztos hogy mi  */
 	// .main-playlistEditDetailsModal-albumCover,   /* ebben nem vagyok biztos hogy mi  */
-	document.body.appendChild(styleToHideCoverArtImages2);
+	//document.body.appendChild(styleToHideCoverArtImages2);
 	
 	const styleToHideCoverArtImages3 = document.createElement("style");
 	styleToHideCoverArtImages3.innerHTML = `
@@ -345,46 +345,6 @@
 	// .main-coverSlotExpanded-container,         /* ebben nem vagyok biztos hogy mi  */
 	// .main-playlistEditDetailsModal-albumCover,   /* ebben nem vagyok biztos hogy mi  */
 	document.body.appendChild(styleToHideCoverArtImages3);
-	
-	
-	//Ez egy outdated fv és semmire nem használom:
-	function sanitizePage()
-	{
-		//ezt fogod kapni:
-		//{
-		//<div class="main-trackList-rowSectionVariable" role="gridcell" aria-colindex="3" tabindex="-1"><span data-encore-id="type" class="Type__TypeElement-sc-goli3j-0 TypeElement-mesto-type"><a draggable="true" class="standalone-ellipsis-one-line" dir="auto" href="/album/4PEATKNNKmWcSoRLyVQDRS" tabindex="-1">I Know</a></span></div>
-		//}
-		
-		const albumLinks = document.querySelectorAll("div.main-trackList-rowSectionVariable > span > a");
-		
-		albumLinks.forEach((userItem) =>
-		{
-			const uri = "spotify:album:" + userItem.getAttribute("href").replace('/album/', '');
-			// − const uri = `spotify:artist:${data.uri.split(":")[3]}`;
-			if (trashAlbumList.has(uri))
-			{
-				//userItem.innerHTML = userItem.innerHTML + " TO BE CENSORED";
-				
-				//const rows = document.querySelectorAll(".main-trackList-rowSectionStart .main-trackList-rowImage");
-				const rows = userItem.parentElement.parentElement.parentElement.querySelectorAll(".main-trackList-rowImage");
-				// asszem értem hogy miben tér el a queue és  history page. Abban hogy a histry-n nincs szám a sorok elején.
-				
-				rows.forEach((row) =>
-				{
-					if (row.parentElement.parentElement === userItem.parentElement.parentElement.parentElement) // egy ilyen elemről van szó: class="main-trackList-trackListRow main-trackList-trackListRowGrid". És ha ez közös kettőnél akkor tudhatjuk hogy azonos sorban vannak.
-					{
-						//row.classList.add("force-hide-image"); // ez működik de a Spotify azonnal eltávlítja szóval csak kb. 1 ms-ig marad rejtve a cover art. ez nem jó. -> mégis működne, de azt kérem hogy inkább a src legyen ""-re állítva mert az szebb megoldás szerintem. Nem távolítja el a kép helyét csak átállítja a covert-t egy szürke hangjegy ikonra.
-						//row.innerHTML  = "";
-						row.setAttribute("src", "");
-					}
-				});
-			}
-			else
-			{
-			
-			}
-		});
-	}
 	
 	
 	// Function to process the element and remove "src" attribute

@@ -4,7 +4,7 @@
     "description": "Hide any arbitrary image inside Spotify (sexually explicit, bothersome, or any other images you want).",
     "preview": "https://i.imgur.com/C1w7oFG.png",
     "main": "HideImages.js",
-    "readme": "readme.md",
+    "readme": "Readme.md",
     "tags": ["hide", "image", "images", "cover art", "block", "blocker", "porn", "censor"]
   }
 ]
