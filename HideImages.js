@@ -1084,10 +1084,6 @@
 		{
 			//sanitizePage();
 		}
-		else if (location.pathname.startsWith("/playlist"))
-		{
-			tryToSanitizePage();
-		}
 		else if (location.pathname.startsWith("/history"))
 		{
 			//sanitizePage();
@@ -1154,6 +1150,21 @@
 				}
 			}
 		}
+		else if (location.pathname.startsWith("/playlist"))
+		{
+			//const uri = "spotify:playlist:" + location.pathname.replace('/playlist/', '');
+			//console.verbose(uri);
+			
+			if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage)) // this is incentional, as the album-hider CSS also happens to hide the cover art of playlists. So has to be removed
+			{
+				document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
+			}
+			
+			tryToSanitizePage();
+			
+			//DEBUG:
+			//Spicetify.showNotification("path: " + location.pathname);
+		}
 		else
 		{
 			if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage))
@@ -1163,6 +1174,8 @@
 			
 			tryToSanitizePage();
 			
+			//DEBUG:
+			//Spicetify.showNotification("path: " + location.pathname);
 		}
 		
 		if (location.pathname.startsWith("/search") == false)

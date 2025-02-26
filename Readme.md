@@ -33,7 +33,7 @@ What works: Almost everything.
 
 What is not implemented yet: (In my experience these are rarely bothersome but I may do them later)
 
-- removing the so called "photo" of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages),
+- removing the so-called "photo" of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages),
 - on the "All" tab of the search page: "Playlists", "Featuring" rows, and the track results on the right.
 - the "popular tracks" on artist pages. 
 - the "Playlists" tab of the Search page. 
