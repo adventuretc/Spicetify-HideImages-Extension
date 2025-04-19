@@ -1,6 +1,6 @@
 // NAME: HideImages
 // AUTHOR: adventuretc, khanhas, OhItsTom
-// VERSION: 1.9
+// VERSION: 2.0
 // DESCRIPTION: Throw albums or artists to a trashbin and never see their images again. What works: Almost everything except these which are not implemented yet: filtering of Discography pages, filtering of the Home page, filtering of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages). 
 
 /// <reference path="../globals.d.ts" />
@@ -22,6 +22,7 @@
 		setTimeout(HideImages, 1000);
 		return;
 	}
+	
 	
 	const HideImages_config_version_dbkey = "HideImages-config-version";
 	
@@ -269,6 +270,7 @@
 	const content = document.createElement("div");
 	styleSettings();
 	
+	
 	// We will hide the current playing song image dynamically.
 	const styleToHideNowPlayingTrackCoverArtImage = document.createElement("style");
 	styleToHideNowPlayingTrackCoverArtImage.innerHTML = `
@@ -290,7 +292,15 @@
 //     console.log(event.data);
 // });
 	
-	
+
+	// profilePicture aka artistAvatar aka artistIcon
+	const styleToHideArtistAvatarOnArtistPage = document.createElement("style");
+	styleToHideArtistAvatarOnArtistPage.innerHTML = `
+		.main-image-image.main-avatar-image.main-image-loaded
+		{
+			opacity: 0.0;
+		}
+		`;
 	const styleToHideTopBackgroundImageOnArtistPage = document.createElement("style");
 	styleToHideTopBackgroundImageOnArtistPage.innerHTML = `
 		.main-entityHeader-background.main-entityHeader-gradient
@@ -1060,6 +1070,7 @@
 		}
 		, 2000);
 	
+	console.log("HideImages extension initialized");
 	
 	// "appchange" when user changes page.
 	
@@ -1110,15 +1121,29 @@
 				return;
 			}
 			
-			const artistUri = targetElements[0].getAttribute("data-test-uri"); // yields "spotify:artist:181bsRPaVXVlUKXrxwZfHK"
+			// The location location.pathname contains the artist id a lot more reliably than the main > section data-test-uri attribute.
+			// const artistUri = targetElements[0].getAttribute("data-test-uri"); // yields "spotify:artist:181bsRPaVXVlUKXrxwZfHK"
+			const artistUri = "spotify:artist:" + location.pathname.replace('/artist/', "").replace(/(\/.*)/, "");
+			
+			//DEBUG:
+			//Spicetify.showNotification("artist URI: " + location.pathname + "   " + artistUri);
 			
 			if (trashArtistList[artistUri])
 			{
 				document.body.appendChild(styleToHideTopBackgroundImageOnArtistPage);
 				document.body.appendChild(styleToHideBottomBackgroundImageOnArtistPage);
+				document.body.appendChild(styleToHideArtistAvatarOnArtistPage);
+				
+				
+				//DEBUG:
+				//Spicetify.showNotification(" blocked path");
+				//console.log(trashArtistList); 
 			}
 			else
 			{
+				//DEBUG:
+				//Spicetify.showNotification(" allowed path");
+				
 				if (document.body.contains(styleToHideTopBackgroundImageOnArtistPage))
 				{
 					document.body.removeChild(styleToHideTopBackgroundImageOnArtistPage);
@@ -1126,6 +1151,10 @@
 				if (document.body.contains(styleToHideBottomBackgroundImageOnArtistPage))
 				{
 					document.body.removeChild(styleToHideBottomBackgroundImageOnArtistPage);
+				}
+				if (document.body.contains(styleToHideArtistAvatarOnArtistPage))
+				{
+					document.body.removeChild(styleToHideArtistAvatarOnArtistPage);
 				}
 			}
 		}
@@ -1381,7 +1410,6 @@
 		//if (true)
 		if (Spicetify.LocalStorage.get(migrationKey) !== "true")
 		{
-			
 			console.log("Migrating HideImages extension storage keys...");
 			
 			migrateKey("TrashAlbumList", "HideImages_TrashAlbumList");
@@ -1392,6 +1420,12 @@
 			Spicetify.LocalStorage.set(migrationKey, "true");
 			Spicetify.LocalStorage.set(HideImages_config_version_dbkey, "1.9");
 			console.log("Storage migration completed.");
+		}
+		else // If already migrated. We shall delete the old data.
+		{
+			Spicetify.LocalStorage.remove("TrashSongList");
+			Spicetify.LocalStorage.remove("TrashAlbumList");
+			Spicetify.LocalStorage.remove("TrashArtistList");
 		}
 	};
 	
@@ -1505,6 +1539,8 @@
 		trashbinIcon
 	).register();
 	
+	// This is to sanitize the home page the very first time Spotify open.
+	tryToSanitizePage();
 	
 	const fetchAlbum = async uri =>
 	{
