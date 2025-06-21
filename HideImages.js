@@ -1771,7 +1771,7 @@
 				case Spicetify.URI.Type.PLAYLIST:
 				case Spicetify.URI.Type.PLAYLIST_V2:
 					{
-						let meta = await fetchPlaylist(uri);
+						// let meta = await fetchPlaylist(uri);
 
 						const foundElement = trashPlaylistList[uri];
 
@@ -1780,7 +1780,7 @@
 							trashPlaylistList[uri] = true;
 
 							document.body.appendChild(styleToHideCoverArtImageOnAnAlbumPage);
-							Spicetify.showNotification("Playlist added to trashbin: " + meta.title);
+							Spicetify.showNotification("Playlist added to trashbin: " + uri);
 						}
 						else
 						{

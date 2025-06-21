@@ -18,6 +18,8 @@ What works: Almost everything.
 - the cover art of the currently playing track on the lower left. 
 - the cover art when you view an album. 
 - background images of artists. 
+- the covert art (so-called photo) of Playlists (the main image of the playlist on the playlist's own page)
+- censoring Playlist images on Artist Overview pages.
 - every cover art on artist overview pages except playlists. 
 - everything in the "Queue" view. 
 - everything in the "Recently played" view. 
@@ -33,10 +35,8 @@ What works: Almost everything.
 
 What is not implemented yet: (In my experience these are rarely bothersome but I may do them later)
 
-- removing the so-called "photo" of Playlists (the icon of the playlist on the playlist's page and the playlist icons on artist overview pages),
-- on the "All" tab of the search page: "Playlists", "Featuring" rows, and the track results on the right.
+- on the _All_ tab of the search page: the _Best match_ on the top left, _Artists_, _Featuring_ sections, and the song results on the right. The _Playlists_ sections work, however.
 - the "popular tracks" on artist pages. 
-- the "Playlists" tab of the Search page. 
 - in the Home page's "Recently played" section if a _single track_ appears, it is not hidden even though the containing album is supposed to be hidden. 
 
 ## How to install: 
