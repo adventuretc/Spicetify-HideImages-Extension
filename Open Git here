@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DIR=`dirname "$BASH_SOURCE[0]"`
+cd "$DIR"
+echo "Current dir: $DIR"
+# ha "terminálban futtatom" és nem a sima execute opcióra megyek a fájlkezelőben akkor nem nyílik meg a thg. Azért mert a cwd hibás. Ez a fenti 3 sor ezt hivatott orvosolni.
+# de mégsem működött. Nem tudom mi a megoldás.
+# talán a locale-t kéne átállítani. Vagy a terminál emulátoros parancs nem jó a pcmanfm-ben. 
+
+# gitg # ez a program mindig a cwd-ből próbál meg git repo-t betölteni.
+
+# vagy:
+
+gitkraken --path .
