@@ -36,7 +36,7 @@ What works: Almost everything.
 What is not implemented yet: (In my experience these are rarely bothersome but I may do them later)
 
 - on the _All_ tab of the search page: the _Best match_ on the top left, _Artists_, _Featuring_ sections, and the song results on the right. The _Playlists_ sections work, however.
-- the "popular tracks" on artist pages. 
+- the _Popular tracks_ part on Artist Overview pages work correctly if the whole artist is blocked but otherwise _does not_ hide images that should be hidden based on your blocked albums. 
 - in the Home page's "Recently played" section if a _single track_ appears, it is not hidden even though the containing album is supposed to be hidden. 
 
 ## How to install: 
@@ -55,9 +55,9 @@ What is not implemented yet: (In my experience these are rarely bothersome but I
 - ~~Album covers loaded after scrolling down on a Discography page of an Artist don't get filtered.~~ 🠲 Fixed (2025-06-21)
 - ~~Can't hide artist bottom banners (the CSS selector is outdated).~~ 🠲 Fixed (2025-06-21)
 - ~~Can't hide artist profile pictures (the CSS selector is outdated).~~ 🠲 Fixed (2025-06-21)
+- ~~Can't hide artist top banners (the CSS selector is outdated).~~
+- ~~The Queue view always hides all cover arts.~~ -> Seems not to occur in prod. Does it?
 - Right clicking and blocking a song will add the song to the trashbin whereas it's supposed to add the album to the trashbin. It will display the message "Song added to trashbin". Pressing the trash _icon_ (next to the song's name) works correctly, however. 
-- // Can't hide artist top banners (the CSS selector is outdated).
-- // The Queue view always hides all cover arts. -> Seems not to occur in prod. Does it?
 
 ## The goal of the project:
 
