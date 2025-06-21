@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR=`dirname "$BASH_SOURCE[0]"`
+cd "$DIR"
+echo "Current dir: $DIR"
+# ha "terminálban futtatom" és nem a sima execute opcióra megyek a fájlkezelőben akkor nem nyílik meg a thg. Azért mert a cwd hibás. Ez a fenti 3 sor ezt hivatott orvosolni.
+
+rider_Csharp_ide .
