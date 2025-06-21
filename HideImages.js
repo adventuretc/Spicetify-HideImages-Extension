@@ -14,8 +14,7 @@
 
 	console.log("HideImages extension loaded");
 
-	// Define the global event listener variable near the top of your main function
-	let globalTempEventListener = null;
+	
 
 	const skipBackBtn =
 		document.querySelector(".main-skipBackButton-button") ??
@@ -29,10 +28,6 @@
 
 	const HideImages_config_version_dbkey = "HideImages-config-version";
 
-	class PlaylistData
-	{
-
-	}
 	class AlbumData
 	{
 		//constructor(uri, title, imageUrls)
@@ -301,11 +296,6 @@
 	// });
 
 
-
-	// TODO: we have a problem here. something is not blocked: The artist's avatar on other artists' pages, under the "A rajongók ezt is szeretik" section.
-	// the HTML:
-	// <div class="main-card-imageContainer"><div class="GOcsybnoHYyJGQGDRuwj MxmW8QkHqHWtuhO589PV"><div><img aria-hidden="false" draggable="false" loading="lazy" src="https://i.scdn.co/image/ab6761610000517444968b056b6979c120b0dcf1" alt="" class="main-image-image yMQTWVwLJ5bV8VGiaqU3 MxmW8QkHqHWtuhO589PV main-image-loaded"></div></div><div class="main-card-PlayButtonContainer"><div class="ix_8kg3iUb9VS5SmTnBY"><button aria-label="Ava Max lejátszása" data-encore-id="buttonPrimary" data-is-icon-only="true" </div></div></div>
-
 	// profilePicture aka artistAvatar aka artistIcon
 	const styleToHideArtistAvatarOnArtistPage = document.createElement("style");
 	styleToHideArtistAvatarOnArtistPage.innerHTML = `
@@ -416,15 +406,16 @@
 	}
 
 	// MutationObserver to watch for newly added img elements
-	function artistPageDiscoveryImageObserver()
+	function artistDiscographyPageMutationObserver()
 	{
-		const observer = new MutationObserver((mutations) =>
-		{
+		return new MutationObserver((mutations) => {
+			// The below commented out code would be the _Right way_ to do it, then climb up the DOM some to find the parent of the img and then read and check the album URI and  then hide the imd if it is blacklisted. I currently use this Mobserver as a catch-all event listener on the Discography page that allows me to scan the page with my code at the right time.
+			// Thhis code is easier to write for me so it will stay for now.
+
 			const location = Spicetify.Platform.History.location;
 
 			// Only process if we're on a playlist page
-			if (!location.pathname.startsWith("/artist"))
-			{
+			if (!location.pathname.startsWith("/artist")) {
 				return;
 			}
 
@@ -435,28 +426,23 @@
 			// 2025-06-21 most így van:  ".main-card-cardContainer div div a.Gi6Lr1whYBA2jutvHvjQ"  🠲 href -> /album/valami
 			// utánanéztem és a vessző használata valid a element.querySelectorAll függvényben. Uses a compound CSS selector with a comma separator, which means "select elements that match either selector"
 
-			for (const albumLink of albumLinks)
+			for (const albumLink of albumLinks) 
 			{
-				if (!albumLink.hasAttribute("href"))
-				{
+				if (!albumLink.hasAttribute("href")) {
 					continue;
 				}
 
 				const albumUri = "spotify:album:" + albumLink.getAttribute("href").replace('/album/', '');
 
 
-				if (trashAlbumList.has(albumUri))
+				if (trashAlbumList.has(albumUri)) 
 				{
 					// as of 2025-06-21:
-					albumLink.parentElement.parentElement.parentElement.querySelectorAll("img").forEach(img => 
-					{
+					albumLink.parentElement.parentElement.parentElement.querySelectorAll("img").forEach(img => {
 						img.setAttribute("extensionProcessed", "true");
 						img.setAttribute("pleaseHideThis", "true");
 					});
 
-					// The below would be the _Right way_ to do it, then climb up the DOM some to find the parent of the img and then read and check the album URI and  then hide the imd if it is blacklisted.
-					// The *above* code is easier to write for me so it will stay for now.
-					
 					// mutations.forEach(mutation =>
 					// {
 					// 	// Check for newly added nodes
@@ -507,14 +493,10 @@
 				}
 			}
 		});
-
-		return observer;
 	}
 
-
-	// Initialize the playlist image observer
-	const playlistImageObserver = artistPageDiscoveryImageObserver();
-
+	// Initialize the Discography page observer but do not start it.
+	const artistDiscographyPageMutationObserver1 = artistDiscographyPageMutationObserver();
 
 
 	// Function to process the element and remove "src" attribute
@@ -619,7 +601,7 @@
 				}
 			}
 		}
-		else if (pageType == "The albums tab of the Search page")
+		else if (pageType === "The albums tab of the Search page")
 		{
 			// element is a ".main-card-card"
 
@@ -645,7 +627,7 @@
 						imageToBeHidden.setAttribute("src", "");
 						imageToBeHidden.setAttribute("extensionProcessed", "true");
 					}
-					else if (imageToBeHiddenFallback.hasAttribute("extensionProcessed") == "false")
+					else if (imageToBeHiddenFallback.hasAttribute("extensionProcessed") === "false")
 					{
 						//imageToBeHiddenFallback.style.visibility = "hidden";
 						imageToBeHiddenFallback.setAttribute("extensionProcessed", "true");
@@ -656,7 +638,7 @@
 				}
 			}
 		}
-		else if (pageType == "tracklistview")
+		else if (pageType === "tracklistview")
 		{
 			//await sleep(1000);
 
@@ -690,7 +672,7 @@
 				//console.log("Removed 'src' attribute from the element. uri: " + uri);
 			}
 		}
-		else if (pageType == "searchpagehighlightedresult")
+		else if (pageType === "searchpagehighlightedresult")
 		{
 			//const albumLink = element;
 			//const albumLink = document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link")[0];
@@ -762,7 +744,9 @@
 		{
 			// handle other artists' profile images on the "Fans also like / Recommended artists" section
 
-			const f = document.querySelectorAll("div.Box__BoxComponent-sc-y4nds-0.BoxComponent-group-card-naked-isInteractive-draggable.e-9640-box.Box-sc-1njtxi4-0.Box-group-naked-card-md-isInteractive-draggable.main-card-cardContainer.Card").forEach(e =>
+			/// TODO: we have a problem here. something is not blocked: The artist's avatar on other artists' pages, under the "A rajongók ezt is szeretik" section.
+			
+			document.querySelectorAll("div.Box__BoxComponent-sc-y4nds-0.BoxComponent-group-card-naked-isInteractive-draggable.e-9640-box.Box-sc-1njtxi4-0.Box-group-naked-card-md-isInteractive-draggable.main-card-cardContainer.Card").forEach(e =>
 			{
 				// console.log ("okay 1"); // this line gets 2700 hits per page and keeps repeating periodically
 
@@ -772,19 +756,18 @@
 
 				if ((e.getAttribute("aria-labelledby") || "").startsWith("card-title-spotify:artist"))
 				{
-					console.log("okay 2");  // this line gets 520 hits per page and keeps repeating periodically
+					// console.log("okay 2");  // this line gets 520 hits per page and keeps repeating periodically
 					const uri = e.getAttribute("aria-labelledby").replace("card-title-", "");
 
-					console.log(uri); // wip -> this works okay. I get spotify:artist:4npEfmQ6YuiwW1GpUmaq3F-3 and so on.
+					// console.log(uri); // -> this works okay. I get spotify:artist:4npEfmQ6YuiwW1GpUmaq3F-3 and so on.
 
 					if (trashArtistList[uri])
 					{
-						console.log("okay 3"); // wip This line never runs, which is a mistery.
+						// console.log("okay 3"); // This line never runs; why, is a mistery.
 						e.remove();
 					}
 				}
 
-				// TODO: we have a problem here. something is not blocked: The artist's avatar on other artists' pages, under the "A rajongók ezt is szeretik" section.
 				// the HTML:
 				// <div class="main-card-imageContainer"><div class="GOcsybnoHYyJGQGDRuwj MxmW8QkHqHWtuhO589PV"><div><img aria-hidden="false" draggable="false" loading="lazy" src="https://i.scdn.co/image/ab6761610000517444968b056b6979c120b0dcf1" alt="" class="main-image-image yMQTWVwLJ5bV8VGiaqU3 MxmW8QkHqHWtuhO589PV main-image-loaded"></div></div><div class="main-card-PlayButtonContainer"><div class="ix_8kg3iUb9VS5SmTnBY"><button aria-label="Ava Max lejátszása" data-encore-id="buttonPrimary" data-is-icon-only="true" </div></div></div>
 			});
@@ -809,7 +792,7 @@
 			if (
 				trashAlbumList.has(putativeAlbumURI)
 				||
-				trashPlaylistList[putativePlaylistURI] == true
+				trashPlaylistList[putativePlaylistURI] === true
 			)
 			{
 				//albumOrPlaylistLink.innerHTML = albumOrPlaylistLink.innerHTML + " TO BE CENSORED";
@@ -907,9 +890,9 @@
 	// Function to handle the appearance of target elements in the DOM
 
 
-	function handleTargetElements(records, selector, pageType)
+	function handleTargetElements(mutationList, cssSelector, pageTypeIndicatorString)
 	{
-		// I have tried everything i could and the lousy MutationObserver only calls the callback once even though it should after every single mutation on the page (which is dozens). There was no .disconnect command anywhere. It just doesnt work.  So I will rewrite the code to use actively called processing methods and only use MutationObserver for the tracklists wich is the only thing that seems to be handled well (possibly due to the selector being short, only having a single class).  The weird thing is, when i run the same selector in the console, after the page has loaded, it always works and returns 42 or so results. I'm talking about this one: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult"). But the same thing never works if inside the mutationobserver callback. It says selectorMatchesTheseElementsNodeList.length == 0 and it only gets called once per search-page load (which is erroneous).
+		// I have tried everything i could and the lousy MutationObserver only calls the callback once even though it should after every single mutation on the page (which is dozens). There was no .disconnect command anywhere. It just doesnt work.  So I will rewrite the code to use actively called processing methods and only use MutationObserver for the tracklists wich is the only thing that seems to be handled well (possibly due to the selector being short, only having a single class).  The weird thing is, when i run the same selector in the console, after the page has loaded, it always works and returns 42 or so results. I'm talking about this one: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult"). But the same thing never works if inside the mutationobserver callback. It says selectorMatchesTheseElementsNodeList.length is equals 0 and it only gets called once per search-page load (which is erroneous).
 		//EDIT:
 		//I think I figured out what causes the problem:  MutationObserver works asynchronously and sometimes its collection period never ends I guess.
 		//We have an array of MutationRecord because MutationObserver works asynchronously as it's more efficient this way. The callback will not be fired until the DOM has finished changing. So at a given time, all mutations will be “collected” in an array.2019. febr. 19.
@@ -921,7 +904,7 @@
 		// "In JavaScript, I rewrite every function so that it can end as soon as possible. You want the browser back in control so it can make your DOM changes."
 		// "Every time I've wanted a sleep in the middle of my function, I refactored to use a setTimeout()."
 
-		const selectorMatchesTheseElementsNodeList = document.querySelectorAll(selector);
+		const selectorMatchesTheseElementsNodeList = document.querySelectorAll(cssSelector);
 		{
 			//https://developer.mozilla.org/en-US/docs/Web/API/NodeList
 			//NodeList
@@ -937,11 +920,11 @@
 
 		const selectorMatchesTheseElements = Array.from(selectorMatchesTheseElementsNodeList); // to be able to use the Array.includes() fn.
 
-		for (const record of records)
+		for (const mutation of mutationList)
 		{
 			//if (record.addedNodes.length > 0)
 			//if (record.type === "childList" && record.addedNodes.length > 0)
-			if (record.type === "childList")
+			if (mutation.type === "childList")
 			{
 				// Check if the added nodes include the target element with the class name
 				//for (const node of record.addedNodes) {
@@ -956,7 +939,7 @@
 
 				// targetNode.ownerElement vagy targetNode kell ide?
 
-				for (const node of record.addedNodes)
+				for (const node of mutation.addedNodes)
 				{
 					if (node.nodeType === Node.ELEMENT_NODE)
 					{
@@ -969,7 +952,7 @@
 							//console.log("it works v2 " + selector);
 							// Process the element
 
-							processElement(node, pageType);
+							processElement(node, pageTypeIndicatorString);
 						}
 					}
 					//https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/type
@@ -981,13 +964,13 @@
 						//console.log("it works v4 " + selector);
 						//Process the element
 
-						processElement(node.ownerElement, pageType);
+						processElement(node.ownerElement, pageTypeIndicatorString);
 					}
 				}
 			}
-			else if (record.type === "attributes")
+			else if (mutation.type === "attributes")
 			{
-				const targetNode2 = record.target;
+				const mutated_node = mutation.target;
 				//if ((targetNode.nodeType === Node.ELEMENT_NODE)  && targetNode.matches(selector))
 
 				//if ( Array.from(document.querySelectorAll(".main-card-card")).includes(targetNode2) )
@@ -1001,7 +984,7 @@
 				//}
 
 				// if (record.attributeName !== "src" && record.attributeName !== "style" || (record.attributeName === "src" && record.target.getAttribute("src") !== "")) // discard this because I will modify src and it would get into an infinite recursive loop. -> edit: This blocking is too broad. I may not be catching all events.
-				if (record.attributeName !== "src" || (record.attributeName === "src" && record.target.getAttribute("src") !== ""))
+				if (mutation.attributeName !== "src" || (mutation.attributeName === "src" && mutated_node.getAttribute("src") !== ""))
 				{
 					//https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/target
 					//MutationRecord: target property
@@ -1013,15 +996,15 @@
 					//If the record's type is "childList", this is the Node whose children changed.
 
 
-					const targetNode = record.target;
+					
 					//if ((targetNode.nodeType === Node.ELEMENT_NODE)  && targetNode.matches(selector))
-					if (selectorMatchesTheseElements.includes(targetNode))
+					if (selectorMatchesTheseElements.includes(mutated_node))
 					{
 						//console.log("it works v3 " + selector);
 						// Process the element
 
 						//setTimeout(processElement(targetNode, pageType),1000);
-						processElement(targetNode, pageType);
+						processElement(mutated_node, pageTypeIndicatorString);
 					}
 
 					//https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/type
@@ -1035,11 +1018,12 @@
 					//}
 				}
 			}
-			else if (record.type === "characterData")
+			else if (mutation.type === "characterData")
 			{
-				//console.log("DEBUG: " + record);
+				console.log("DEBUG: does this ever happen?--1");
+				console.log("DEBUG: " + record);
 
-				const element = record.target.parentElement;
+				const element = mutation.target.parentElement;
 
 				if (element)
 				{
@@ -1047,46 +1031,13 @@
 					{
 						//console.log("it works v5 " + selector);
 
-						processElement(element, pageType);
+						processElement(element, pageTypeIndicatorString);
 					}
 				}
 			}
 		}
 	}
 
-
-	// snippet from the internet:
-	// "I have used it in several projects."
-	//function waitForElm(selector) {
-	//return new Promise(resolve => {
-	//if (document.querySelector(selector)) {
-	//return resolve(document.querySelector(selector));
-	//}
-
-	//const observer = new MutationObserver(mutations => {
-	//if (document.querySelector(selector)) {
-	//resolve(document.querySelector(selector));
-	//observer.disconnect();
-	//}
-	//});
-
-	//observer.observe(document.body, {
-	//childList: true,
-	//subtree: true
-	//});
-	//});
-	//}
-
-	//To use it:
-
-	//waitForElm('.some-class').then((elm) => {
-	//console.log('Element is ready');
-	//console.log(elm.textContent);
-	//});
-
-	//Or with async/await:
-
-	//const elm = await waitForElm('.some-class');
 
 	// Recursive function to wait for the element and process it
 	function waitForElement(selector, pageType)
@@ -1125,10 +1076,10 @@
 
 		// talán ez a baj: https://stackoverflow.com/questions/45117558/how-can-i-observe-the-whole-body-with-mutationobserver -> nem.
 
-		//ez a baj:
-		//https://stackoverflow.com/questions/65691170/javascript-mutationobserver-misses-mutations
+		// ez a baj:
+		// https://stackoverflow.com/questions/65691170/javascript-mutationobserver-misses-mutations
 		// cím: JavaScript, MutationObserver misses mutations
-		// válasz: The usual reason is that a parent/ancestor of that element was replaced. – wOxxOm
+		// válasz: The usual reason is that a parent/ancestor of that element was replaced.
 
 
 		var container = document.documentElement || document.body;
@@ -1139,7 +1090,7 @@
 			subtree: true,
 			attributes: true,
 			characterData: true
-		}); // ez nem jó mert a src attribútumot én megmásítom rajta és akkor végtelen loop-ba kerül ez a cucc. Más megoldás kéne. Vagy ignorálni kell a src változásokat.
+		}); // ez nem jó mert a src attribútumot én megmásítom rajta és akkor végtelen loop-ba kerül ez a cucc. Más megoldás kéne. Vagy ignorálni kell a src változásokat. Erre létezik attributeFilter amúgy
 
 		//https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/disconnect
 		//observer.disconnect();
@@ -1152,7 +1103,7 @@
 		waitForElement(".main-trackList-rowImage", "tracklistview");
 
 
-		document.documentElement.addEventListener("click", documentClickEventListener); // this is to be able to react to when the user presses a button on the search page and the DOM is updated. E.g. they she goes from "All" to "Playlists" and back. Without this, the newly loaded DOM would never be sanitized.
+		
 
 
 		waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
@@ -1299,12 +1250,14 @@
 			{
 				e.removeEventListener("input", documentKeyStrokeEventListener);
 				e.addEventListener("input", documentKeyStrokeEventListener); // this is to be able to react to when the user presses a button on the search page and the DOM is updated. E.g. they she goes from "All" to "Playlists" and back. Without this, the newly loaded DOM would never be sanitized.
+
+				document.documentElement.addEventListener("click", documentClickEventListener); // this is to be able to react to when the user presses a button on the search page and the DOM is updated. E.g. they she goes from "All" to "Playlists" and back. Without this, the newly loaded DOM would never be sanitized.
 			});
 		}
 		else if (location.pathname.startsWith("/artist"))
 		{
 			// Add the event listener / Start observing
-			playlistImageObserver.observe(document.body,
+			artistDiscographyPageMutationObserver1.observe(document.body,
 				{
 					childList: true,
 					subtree: true,
@@ -1408,12 +1361,12 @@
 			//Spicetify.showNotification("path: " + location.pathname);
 		}
 
-		if (location.pathname.startsWith("/artist") == false)
+		if (location.pathname.startsWith("/artist") === false)
 		{
 			// unf. these CSS snippets need to be removed since their blocking power is too broad and also block various other images on the history and queue page
 
 			// Turn off the mutationobserver.
-			playlistImageObserver.disconnect();
+			artistDiscographyPageMutationObserver1.disconnect();
 
 
 			if (document.body.contains(styleToHideTopBackgroundImageOnArtistPage))
@@ -1429,10 +1382,12 @@
 				document.body.removeChild(styleToHideArtistAvatarOnArtistPage);
 			}
 		}
-		if (location.pathname.startsWith("/search") == false)
+		if (location.pathname.startsWith("/search") === false)
 		{
 			// don't listen to keystrokes outside of the search page because it would just lag the app for no reason.
 			document.documentElement.removeEventListener("input", documentKeyStrokeEventListener);
+
+			document.documentElement.removeEventListener("click", documentClickEventListener);
 		}
 	}
 
@@ -1677,7 +1632,7 @@
 			Spicetify.LocalStorage.remove("TrashArtistList");
 			Spicetify.LocalStorage.remove("TrashPlaylistList");
 		}
-	};
+	}
 
 
 	// LocalStorage Setup
@@ -1852,22 +1807,6 @@
 		//console.log(data);
 		//console.log(res);
 
-
-		// https://github.com/tr1ckydev/spotifly/blob/main/src/types/album.ts
-		//{
-		//spotifly
-		//Spotify with wings !
-		//Spotify library in typescript without using the Spotify Web API.
-
-		//No authentication required.
-		//Super fast like the Web API.
-		//Lightweight with zero dependencies.
-		//Strongly typed API functions.
-		//Personalized fetching and automation using cookies.
-		//Automatic internal token refreshing.
-
-		//}
-
 		return {
 			uri,
 			title: res.name,
@@ -1944,7 +1883,6 @@
 			// document.body.append(contextMenu);
 			//console.debug("This song is banned");
 			document.body.appendChild(styleToHideNowPlayingTrackCoverArtImage);
-			return;
 		}
 		else
 		{
@@ -1981,41 +1919,6 @@
 		//uriIndex++;
 		//artistUri = data.item.metadata[`artist_uri:${uriIndex}`];
 		//}
-	}
-
-	/**
-	 *
-	 * @param {string} uri
-	 * @param {string} type
-	 * @returns {boolean}
-	 */
-	function shouldSkipCurrentTrack(uri, type)
-	{
-		const curTrack = Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.metadata;
-		if (type === Spicetify.URI.Type.TRACK)
-		{
-			if (uri === curTrack.uri)
-			{
-				return true;
-			}
-		}
-
-		if (type === Spicetify.URI.Type.ARTIST)
-		{
-			let count = 1;
-			let artUri = curTrack.metadata.artist_uri;
-			while (artUri)
-			{
-				if (uri === artUri)
-				{
-					return true;
-				}
-				artUri = curTrack.metadata[`artist_uri:${count}`];
-				count++;
-			}
-		}
-
-		return false;
 	}
 
 	/**
