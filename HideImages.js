@@ -14,6 +14,9 @@
 
 	console.log("HideImages extension loaded");
 
+	// Define the global event listener variable near the top of your main function
+	let globalTempEventListener = null;
+
 	const skipBackBtn =
 		document.querySelector(".main-skipBackButton-button") ??
 		document.querySelector(".player-controls__left > button[data-encore-id='buttonTertiary']");
@@ -26,6 +29,10 @@
 
 	const HideImages_config_version_dbkey = "HideImages-config-version";
 
+	class PlaylistData
+	{
+
+	}
 	class AlbumData
 	{
 		//constructor(uri, title, imageUrls)
@@ -73,7 +80,6 @@
 	// Retrieve and convert back to Map when needed
 	//const loadedData = Spicetify.LocalStorage.get("HideImages_TrashAlbumList");
 	//const trashAlbumListFromStorage = convertFromString(loadedData); // Convert back to Map
-
 
 	// Convert object to string for saving
 	function objectToString(object)
@@ -167,9 +173,11 @@
 				trashAlbumList = new Map();
 				trashSongList = {};
 				trashArtistList = {};
+				trashPlaylistList = {};
+				trashPlaylistList = {};
 				setWidgetState(false);
 				putDataLocal();
-				Spicetify.showNotification("Trashbin cleared!");
+				Spicetify.showNotification("Image Trashbin cleared!");
 			})
 		);
 	}
@@ -293,30 +301,53 @@
 	// });
 
 
+
+	// TODO: we have a problem here. something is not blocked: The artist's avatar on other artists' pages, under the "A rajongók ezt is szeretik" section.
+	// the HTML:
+	// <div class="main-card-imageContainer"><div class="GOcsybnoHYyJGQGDRuwj MxmW8QkHqHWtuhO589PV"><div><img aria-hidden="false" draggable="false" loading="lazy" src="https://i.scdn.co/image/ab6761610000517444968b056b6979c120b0dcf1" alt="" class="main-image-image yMQTWVwLJ5bV8VGiaqU3 MxmW8QkHqHWtuhO589PV main-image-loaded"></div></div><div class="main-card-PlayButtonContainer"><div class="ix_8kg3iUb9VS5SmTnBY"><button aria-label="Ava Max lejátszása" data-encore-id="buttonPrimary" data-is-icon-only="true" </div></div></div>
+
 	// profilePicture aka artistAvatar aka artistIcon
 	const styleToHideArtistAvatarOnArtistPage = document.createElement("style");
 	styleToHideArtistAvatarOnArtistPage.innerHTML = `
-		.main-image-image.main-avatar-image.main-image-loaded
+		.main-image-image.main-avatar-image.main-image-loaded,
+		.main-trackList-rowImage,
+		.lkXpBMSmNP9w702sek8V,
+		div.vQqlnrnZi2f4zrYRQvKW
 		{
-			opacity: 0.0;
+			opacity: 0.0 !important;
 		}
 		`;
+
+	// I will cram in some other statements just to block the track list images.: main-trackList-rowImage
+	// and some more to block the "Artist pick / Az előadó kiemeltjei" album (.lkXpBMSmNP9w702sek8V) and the "visszaszámlálás a megjelenésig" (div.vQqlnrnZi2f4zrYRQvKW) album on the top right.
 	const styleToHideTopBackgroundImageOnArtistPage = document.createElement("style");
 	styleToHideTopBackgroundImageOnArtistPage.innerHTML = `
-		.main-entityHeader-background.main-entityHeader-gradient
+		.main-entityHeader-background.main-entityHeader-gradient,
+		.wozXSN04ZBOkhrsuY5i2.XUwMufC5NCgIyRMyGXLD
 		{
-			opacity: 0.0;
+			opacity: 0.0 !important;
 			background-image: none;
 		}
 		`;
 
+	// .wozXSN04ZBOkhrsuY5i2.XUwMufC5NCgIyRMyGXLD is for  2025-06-21 oudated CSS maps scenario.
+
 	const styleToHideBottomBackgroundImageOnArtistPage = document.createElement("style");
 	styleToHideBottomBackgroundImageOnArtistPage.innerHTML = `
-		button.artist-artistAbout-container.artist-artistAbout-backgroundImage
+		button.artist-artistAbout-container.artist-artistAbout-backgroundImage,
+		button.jW4eWdr_LUeOXwPpKhWG.DRXonbAbVN5Vg9anDL1X
 		{
 			background-image: none !important;
+			pointer-events: none !important;
 		}
 		`;
+	// The second selector is for when the CSS map is outdated, like right now. 2025-06-21
+	// it's important not to put an excess comma after the last selector since it breaks everything. Unlike how JS allows an excess comma in arrays.
+	// pointer-events: none !important; -> this for you to not be able to click (open) the bio. It would show images and text. This is an easy solution to that.
+	// I'm pretty sure <div class="dIlzffEKwokwWI5sqYJN"> should be .artist-artistAbout-container but I think it's really supposed to be, according to the canonical behavior, jW4eWdr_LUeOXwPpKhWG = .artist-artistAbout-container DRXonbAbVN5Vg9anDL1X = .artist-artistAbout-backgroundImage
+
+	// snippet (Spotify version 1.2.60.564.gcc6305cb):
+	// <button type="button" aria-label="Eminem" class="jW4eWdr_LUeOXwPpKhWG DRXonbAbVN5Vg9anDL1X" style="background-image: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%), url(&quot;https://i.scdn.co/image/whatev);">
 
 	//A 2024-08-02-es updatekor megváltozott a helyes selector.
 	//.album-albumPage-sectionWrapper .main-entityHeader-image /* ez az album view-ban lévő main image-t kiválasztja  */
@@ -347,7 +378,9 @@
 		
 		[pleaseHideThis="true"]
 		{
-			background-color: black;
+			background-color: black !important;
+			background-image: none !important;
+			opacity: 0.0 !important;
 		}`;
 	// Ne hagyj vesszőt a CSS selector végén mert úgy nem fog működni.
 	// .cover-art-image,     /* ebben nem vagyok biztos hogy mi  */
@@ -356,18 +389,130 @@
 	// .main-playlistEditDetailsModal-albumCover,   /* ebben nem vagyok biztos hogy mi  */
 	document.body.appendChild(styleToHideCoverArtImages3);
 
+	// Functions to handle playlist image hiding
+	function hidePlaylistImages()
+	{
+		// Find all img elements that might be playlist images
+		const imgElements = document.querySelectorAll('img');
+		imgElements.forEach(img =>
+		{
+			if (!img.hasAttribute('data-hideimages-processed'))
+			{
+				img.setAttribute('data-hideimages-processed', 'true');
+				img.setAttribute('pleaseHideThis', 'true');
+			}
+		});
+	}
+
+	function showPlaylistImages()
+	{
+		// Remove hiding attributes from all img elements
+		const imgElements = document.querySelectorAll('img[pleaseHideThis="true"]');
+		imgElements.forEach(img =>
+		{
+			img.removeAttribute('pleaseHideThis');
+			img.removeAttribute('data-hideimages-processed');
+		});
+	}
+
+	// MutationObserver to watch for newly added img elements
+	function setupPlaylistImageObserver()
+	{
+		const observer = new MutationObserver((mutations) =>
+		{
+			const location = Spicetify.Platform.History.location;
+
+			// Only process if we're on a playlist page
+			if (!location.pathname.startsWith("/playlist"))
+			{
+				return;
+			}
+
+			const uri = "spotify:playlist:" + location.pathname.replace('/playlist/', '');
+
+			// Only hide images if this playlist is in the trash list
+			if (!trashPlaylistList[uri])
+			{
+				return;
+			}
+
+			mutations.forEach(mutation =>
+			{
+				// Check for newly added nodes
+				mutation.addedNodes.forEach(node =>
+				{
+					if (node.nodeType === Node.ELEMENT_NODE)
+					{
+						// Check if the node itself is an img element
+						if (node.tagName === 'IMG')
+						{
+							if (!node.hasAttribute('data-hideimages-processed'))
+							{
+								node.setAttribute('data-hideimages-processed', 'true');
+								node.setAttribute('pleaseHideThis', 'true');
+							}
+						}
+
+						// Check for img elements within the added node
+						const imgElements = node.querySelectorAll && node.querySelectorAll('img');
+						if (imgElements)
+						{
+							imgElements.forEach(img =>
+							{
+								if (!img.hasAttribute('data-hideimages-processed'))
+								{
+									img.setAttribute('data-hideimages-processed', 'true');
+									img.setAttribute('pleaseHideThis', 'true');
+								}
+							});
+						}
+					}
+				});
+
+				// Check for modified attributes on img elements
+				if (mutation.type === 'attributes' &&
+					mutation.target.tagName === 'IMG' &&
+					(mutation.attributeName === 'src' || mutation.attributeName === 'srcset'))
+				{
+
+					const img = mutation.target;
+					if (!img.hasAttribute('data-hideimages-processed'))
+					{
+						img.setAttribute('data-hideimages-processed', 'true');
+						img.setAttribute('pleaseHideThis', 'true');
+					}
+				}
+			});
+		});
+
+
+		return observer;
+	}
+
+	// Initialize the playlist image observer
+	const playlistImageObserver = setupPlaylistImageObserver();
+
+
 
 	// Function to process the element and remove "src" attribute
 	function processElement(element, pageType)
 	{
 		if (pageType === "Handle the Discography page.")
 		{
+			// As of 2025-06-21, all of these class selectors are broken.
+			// I will use .T0fKO6B7LQSCE_VaSM1P as the Discography container element
+			// and .mxGhI8Lr7MoGOnFrbsUa ._J3pHQwtD9vJwENSsbjd a
+			// instead of :
+			// .artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a
+
 			// the parent element: ".artist-artistDiscography-headerContainer"
 			// the image containing element: ".artist-artistDiscography-headerImage img" -> the src and srcset attribute
 			// the album-uri containing element: ".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a" -> the href attribute
 
 
-			const albumLinks = element.querySelectorAll(".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a");
+			const albumLinks = document.querySelectorAll(".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a, .main-card-cardContainer div div a.Gi6Lr1whYBA2jutvHvjQ");
+			// 2025-06-21 most így van:  ".main-card-cardContainer div div a.Gi6Lr1whYBA2jutvHvjQ"  🠲 href -> /album/valami
+			// utánanéztem és a vessző használata valid a element.querySelectorAll függvényben. Uses a compound CSS selector with a comma separator, which means "select elements that match either selector"
 
 			for (const albumLink of albumLinks)
 			{
@@ -378,19 +523,30 @@
 
 				const albumUri = "spotify:album:" + albumLink.getAttribute("href").replace('/album/', '');
 
+				// albumLink.parentElement.parentElement.parentElement.setAttribute("extensionProcessed", "true");
+				// albumLink.parentElement.parentElement.parentElement.setAttribute("pleaseHideThis", "true");
 				if (trashAlbumList.has(albumUri))
 				{
-					const imageToBeHiddenFallback = element.querySelector(".artist-artistDiscography-headerImage");
+					// as of 2025-06-21:
+					albumLink.parentElement.parentElement.parentElement.querySelectorAll("img").forEach(img => 
+					{
+						img.setAttribute("extensionProcessed", "true");
+						img.setAttribute("pleaseHideThis", "true");
+					});
 
+
+					// before 2025-06-21:
 					const imageToBeHidden = element.querySelector(".artist-artistDiscography-headerImage img");
 
-					if (imageToBeHidden)
+					const imageToBeHiddenFallback = element.querySelector(".artist-artistDiscography-headerImage");
+
+					if (imageToBeHidden != null)
 					{
 						imageToBeHidden.setAttribute("src", "");
 						imageToBeHidden.setAttribute("srcset", "");
 						imageToBeHidden.setAttribute("extensionProcessed", "true");
 					}
-					else if (imageToBeHiddenFallback.hasAttribute("extensionProcessed") === "false")
+					else if (imageToBeHiddenFallback != null && imageToBeHiddenFallback.hasAttribute("extensionProcessed") === "false")
 					{
 						//imageToBeHiddenFallback.style.visibility = "hidden";
 						imageToBeHiddenFallback.setAttribute("extensionProcessed", "true");
@@ -442,7 +598,6 @@
 		}
 		else if (pageType == "The albums tab of the Search page")
 		{
-
 			// element is a ".main-card-card"
 
 			const albumLinks = element.querySelectorAll(".main-card-cardMetadata .main-cardHeader-link");
@@ -511,7 +666,6 @@
 
 				//console.log("Removed 'src' attribute from the element. uri: " + uri);
 			}
-
 		}
 		else if (pageType == "searchpagehighlightedresult")
 		{
@@ -530,7 +684,6 @@
 				//console.log(" href was not found, aborting searchpagehighlightedresult.");
 				return;
 			}
-
 
 			// e.g.: href="/album/38xgBOLAcKoYWMSXWUDH1E?highlight=spotify:track:11xC6P3iKYpFThT6Ce1KdG"
 			const uri = "spotify:album:" + albumLink.getAttribute("href").split("?")[0].replace('/album/', '');
@@ -582,37 +735,68 @@
 				}
 			}
 		}
-		else if (pageType === "artist over view page or album page")
+		else if (pageType === "Home Page, Artist Overview page, or Album page")
 		{
-			//a helyes selector az igazából ez: ".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link"
+			// handle other artists' profile images on the "Fans also like / Recommended artists" section
 
-			// Ez kiválasztja az artist overview page-eken lévő albumokat, pontosabban azt az elemet amiben a link van az albumra, a href tartalmazza a link URL-t.  Ha a href rossz akkor hide this.
+			const f = document.querySelectorAll("div.Box__BoxComponent-sc-y4nds-0.BoxComponent-group-card-naked-isInteractive-draggable.e-9640-box.Box-sc-1njtxi4-0.Box-group-naked-card-md-isInteractive-draggable.main-card-cardContainer.Card").forEach(e =>
+			{
+				// console.log ("okay 1"); // this line gets 2700 hits per page and keeps repeating periodically
 
-			//await sleep(1000);
+				// we will extract artist uri from <div aria-labelledby="card-title-spotify:artist:4npEfmQ6YuiwW1GpUmaq3F-3">
+				// (there are lots of options there but this seems the simplest)
+				// There is no clear plain mention of just the uri, like spotify:artist:4npEfmQ6YuiwW1GpUmaq3F-3
 
-			const albumLink = element;
+				if ((e.getAttribute("aria-labelledby") || "").startsWith("card-title-spotify:artist"))
+				{
+					console.log("okay 2");  // this line gets 520 hits per page and keeps repeating periodically
+					const uri = e.getAttribute("aria-labelledby").replace("card-title-", "");
 
-			if (!albumLink.hasAttribute("href"))
+					console.log(uri); // wip -> this works okay. I get spotify:artist:4npEfmQ6YuiwW1GpUmaq3F-3 and so on.
+
+					if (trashArtistList[uri])
+					{
+						console.log("okay 3"); // wip This line never runs, which is a mistery.
+						e.remove();
+					}
+				}
+
+				// TODO: we have a problem here. something is not blocked: The artist's avatar on other artists' pages, under the "A rajongók ezt is szeretik" section.
+				// the HTML:
+				// <div class="main-card-imageContainer"><div class="GOcsybnoHYyJGQGDRuwj MxmW8QkHqHWtuhO589PV"><div><img aria-hidden="false" draggable="false" loading="lazy" src="https://i.scdn.co/image/ab6761610000517444968b056b6979c120b0dcf1" alt="" class="main-image-image yMQTWVwLJ5bV8VGiaqU3 MxmW8QkHqHWtuhO589PV main-image-loaded"></div></div><div class="main-card-PlayButtonContainer"><div class="ix_8kg3iUb9VS5SmTnBY"><button aria-label="Ava Max lejátszása" data-encore-id="buttonPrimary" data-is-icon-only="true" </div></div></div>
+			});
+
+			// now handle everything else:
+
+			const albumOrPlaylistLink = element;
+
+			if (!albumOrPlaylistLink.hasAttribute("href"))
 			{
 				return;
 			}
 
-			//console.log("I will try to remove the 'src' attribute from the element. albumLink.getAttribute(href): " + albumLink.getAttribute("href") + " (context = artistoverviewpage)");
+			//console.log("I will try to remove the 'src' attribute from the element. albumOrPlaylistLink.getAttribute(href): " + albumOrPlaylistLink.getAttribute("href") + " (context = artistoverviewpage)");
+
+			const putativePlaylistURI = "spotify:playlist:" + albumOrPlaylistLink.getAttribute("href").replace("/playlist/", "");
 
 			// e.g.: href="/album/38xgBOLAcKoYWMSXWUDH1E?highlight=spotify:track:11xC6P3iKYpFThT6Ce1KdG"
-			const uri = "spotify:album:" + albumLink.getAttribute("href").replace("/album/", "");
+			const putativeAlbumURI = "spotify:album:" + albumOrPlaylistLink.getAttribute("href").replace("/album/", "");
 			//console.log("debug: " + uri); // ilyeneket ír ki, ami helyes: spotify:album:38xgBOLAcKoYWMSXWUDH1E
-			if (trashAlbumList.has(uri))
 			//if (true)
+			if (
+				trashAlbumList.has(putativeAlbumURI)
+				||
+				trashPlaylistList[putativePlaylistURI] == true
+			)
 			{
-				//albumLink.innerHTML = albumLink.innerHTML + " TO BE CENSORED";
+				//albumOrPlaylistLink.innerHTML = albumOrPlaylistLink.innerHTML + " TO BE CENSORED";
 
 				//element.removeAttribute("src");
 
 				//element.classList.add("force-hide-image"); // ez működik de a Spotify azonnal eltávlítja szóval csak kb. 1 ms-ig marad rejtve a cover art. ez nem jó. -> ezt itt nem hívhatod meg mert végtelen loop-ba kerül.
 
 				//úgy kell hogy
-				const cardimage = albumLink.parentElement.parentElement.parentElement.querySelector(".main-card-imageContainer img");
+				const cardimage = albumOrPlaylistLink.parentElement.parentElement.parentElement.querySelector(".main-card-imageContainer img");
 
 				if (cardimage)
 				{
@@ -693,7 +877,6 @@
 				//console.log("Removed 'src' attribute from the element. uri: " + uri);
 				//}
 				//}
-
 			}
 		}
 	}
@@ -748,7 +931,7 @@
 				//https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
 				//The matches() method of the Element interface tests whether the element would be selected by the specified CSS selector.
 
-				//          targetNode.ownerElement vagy targetNode kell ide?
+				// targetNode.ownerElement vagy targetNode kell ide?
 
 				for (const node of record.addedNodes)
 				{
@@ -794,14 +977,15 @@
 				//}
 				//}
 
-				if (record.attributeName !== "src" && record.attributeName !== "style" || (record.attributeName === "src" && record.target.getAttribute("src") !== "")) // discard this because I will modify src and it would get into an infinite recursive loop.
+				// if (record.attributeName !== "src" && record.attributeName !== "style" || (record.attributeName === "src" && record.target.getAttribute("src") !== "")) // discard this because I will modify src and it would get into an infinite recursive loop. -> edit: This blocking is too broad. I may not be catching all events.
+				if (record.attributeName !== "src" || (record.attributeName === "src" && record.target.getAttribute("src") !== ""))
 				{
 					//https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/target
 					//MutationRecord: target property
 					//The MutationRecord read-only property target is the target (i.e. the mutated/changed node) of a mutation observed with a MutationObserver.
 					//Value
 					//The Node that the mutation affected.
-					///If the record's type is "attributes", this is the Element whose attributes changed.
+					// If the record's type is "attributes", this is the Element whose attributes changed.
 					//If the record's type is "characterData", this is the CharacterData node.
 					//If the record's type is "childList", this is the Node whose children changed.
 
@@ -952,10 +1136,10 @@
 
 
 		//2024-08-02 előttig:
-		//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page");
-		waitForElement("a.Gi6Lr1whYBA2jutvHvjQ", "artist over view page or album page");
+		//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "Home Page, Artist Overview page, or Album page");
+		waitForElement("a.Gi6Lr1whYBA2jutvHvjQ", "Home Page, Artist Overview page, or Album page");
 
-		waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
+		waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "Home Page, Artist Overview page, or Album page"); // ezt igazából az album page-re használom most.
 
 		waitForElement(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
 
@@ -967,17 +1151,20 @@
 		// the parent element: ".artist-artistDiscography-headerContainer"
 		// the image containing element: ".artist-artistDiscography-headerImage img" -> the src and srcset attribute
 		// the album-uri containing element: ".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a" -> the href attribute
+
 		waitForElement(".artist-artistDiscography-headerContainer", "Handle the Discography page.");
+		// 2025-06-21 for the broken CSS-map:
+		waitForElement(".main-card-cardContainer div div a.Gi6Lr1whYBA2jutvHvjQ", "Handle the Discography page.");
 
 
 		//waitForElement(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult");
 		//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
 
-		//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page");
-		//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
+		//waitForElement(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "Home Page, Artist Overview page, or Album page");
+		//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "Home Page, Artist Overview page, or Album page")} )
 
-		//waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
-		//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
+		//waitForElement("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "Home Page, Artist Overview page, or Album page"); // ezt igazából az album page-re használom most.
+		//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "Home Page, Artist Overview page, or Album page")} )
 
 		//waitForElement(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image");
 	}
@@ -1028,12 +1215,12 @@
 		//waitForElement(", "");
 		//debug: document.querySelectorAll(".main-gridContainer-gridContainer.search-searchResult-searchResultGrid .main-cardHeader-link", "searchpagehighlightedresult").forEach((node) => { processElement(node, "searchpagehighlightedresult")} )
 
-		//processElementsBatch(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page");
-		processElementsBatch("a.Gi6Lr1whYBA2jutvHvjQ", "artist over view page or album page");
-		//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
+		//processElementsBatch(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "Home Page, Artist Overview page, or Album page");
+		processElementsBatch("a.Gi6Lr1whYBA2jutvHvjQ", "Home Page, Artist Overview page, or Album page");
+		//debug: document.querySelectorAll(".artist-artistOverview-artistOverviewContent div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "Home Page, Artist Overview page, or Album page")} )
 
-		processElementsBatch("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "artist over view page or album page"); // ezt igazából az album page-re használom most.
-		//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "artist over view page or album page")} )
+		processElementsBatch("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link", "Home Page, Artist Overview page, or Album page"); // ezt igazából az album page-re használom most.
+		//debug: document.querySelectorAll("div.main-gridContainer-gridContainer.main-shelf-shelfGrid div.main-card-cardMetadata > a.main-cardHeader-link").forEach((node) => { processElement(node, "Home Page, Artist Overview page, or Album page")} )
 
 		processElementsBatch(".main-entityHeader-background.main-entityHeader-gradient", "artistoverviewpage_top_background_image"); // This was good prior to Spotify v1.2.53.440.g7b2f582a
 		processElementsBatch(".main-entityHeader-withBackgroundImage", "artistoverviewpage_top_background_image"); // This is for Spotify from v1.2.53.440.g7b2f582a
@@ -1049,59 +1236,41 @@
 		// the image containing element: ".artist-artistDiscography-headerImage img" -> the src and srcset attribute
 		// the album-uri containing element: ".artist-artistDiscography-headerMetadata .artist-artistDiscography-headerTitle a" -> the href attribute
 		processElementsBatch(".artist-artistDiscography-headerContainer", "Handle the Discography page.");
-	}
+		// 2025-06-21 for the broken CSS-map:
+		processElementsBatch(".main-card-cardContainer div div a.Gi6Lr1whYBA2jutvHvjQ", "Handle the Discography page.");
 
-	function processElementsBatch(selector, pageType)
-	{
-		// Ami most jön az a search page-re vonatkozik de azon belül csak a kiemelt találatra.
-		const targetElements = document.querySelectorAll(selector);
-
-		// Process any existing elements on initial setup
-		for (const element of targetElements)
-		{
-			processElement(element, pageType);
-		}
-	}
-
-	setTimeout(() =>
-	{
-		insertObservers();
-
-	}
-		, 2000);
-
-	console.log("HideImages extension initialized");
-
-	// "appchange" when user changes page.
+		// igazából ez is valid:
+		const location = Spicetify.Platform.History.location;
+		// f: https://spicetify.app/docs/development/api-wrapper/methods/platform/
 
 
-	//Spicetify.Player.addEventListener("appchange", ({ data: data }) =>
-	Spicetify.Platform.History.listen((location) =>
-	{
-		// Log the current pathname every time the user navigates to a new page.
-		//console.log(location.pathname);
+		// location.pathname érték példák:
+		// /queue
+		// /history
+		// /album/dasj9dasjasd234
+		// /artist/dasj9dasjasd234
+		// /artist/4kYSro6naA4h99UJvo89HB/discography/album 🠲 this is the "discography" page (the event only fires if you change to this from a non /artist/ page e.g. the home page. )
+		// /playlist/dasj9dasjasd234
+		// /collection/tracks
+		// this is the "liked songs" page.
+		// /collection/local-files
+		// /search
+		// /search/what you typed
+		// (the event only fires when you visit the Search page and then also when you start typing something, (only your first search), but not afterwards.)
 
-		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.uri
-		// és
-		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.url
-		// ne, várj, ez nem jó, ez a jelenleg szóló zenéről szól, nem a jelenlegi lapról.
+		// const uri = `spotify:artist:${data.uri.split(":")[3]}`;
 
-		//console.log("[info] URL aka location.pathname has changed: " + location.pathname);
+		//Spicetify.showNotification(location.pathname);
 
-		//if (data.isEmbeddedApp === true) return;
-		// if (location.pathname !== "queue") return;
 
 		if (location.pathname.startsWith("/queue"))
 		{
-			//sanitizePage();
 		}
 		else if (location.pathname.startsWith("/history"))
 		{
-			//sanitizePage();
 		}
 		else if (location.pathname.startsWith("/search"))
 		{
-			tryToSanitizePage();
 
 			document.querySelectorAll(".main-topBar-searchBar input").forEach((e) =>  // this is the search bar at the top.
 			{
@@ -1111,9 +1280,16 @@
 		}
 		else if (location.pathname.startsWith("/artist"))
 		{
-			tryToSanitizePage();
+			// Add the event listener / Start observing
+			playlistImageObserver.observe(document.body,
+				{
+					childList: true,
+					subtree: true,
+					attributes: true,
+					attributeFilter: ['src', 'srcset']
+				});
 
-
+			
 			const targetElements = document.querySelectorAll("main > section");
 
 			if (!targetElements[0])
@@ -1160,10 +1336,6 @@
 		}
 		else if (location.pathname.startsWith("/album"))
 		{
-			// This is for the suggested similar albums section that appear at the bottom.
-			tryToSanitizePage();
-
-
 			// this is for the main album image (the cover).
 			const uri = "spotify:album:" + location.pathname.replace('/album/', '');
 			//const uri = `spotify:artist:${data.uri.split(":")[3]}`;
@@ -1181,15 +1353,23 @@
 		}
 		else if (location.pathname.startsWith("/playlist"))
 		{
-			//const uri = "spotify:playlist:" + location.pathname.replace('/playlist/', '');
-			//console.verbose(uri);
+			const uri = "spotify:playlist:" + location.pathname.replace('/playlist/', '');
 
-			if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage)) // this is incentional, as the album-hider CSS also happens to hide the cover art of playlists. So has to be removed
+			if (trashPlaylistList[uri])
 			{
-				document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
+				document.body.appendChild(styleToHideCoverArtImageOnAnAlbumPage);
+				// Apply hiding to any existing playlist images
+				hidePlaylistImages();
 			}
-
-			tryToSanitizePage();
+			else
+			{
+				if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage))
+				{
+					document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
+				}
+				// Remove hiding from playlist images
+				showPlaylistImages();
+			}
 
 			//DEBUG:
 			//Spicetify.showNotification("path: " + location.pathname);
@@ -1201,38 +1381,84 @@
 				document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
 			}
 
-			tryToSanitizePage();
-
 			//DEBUG:
 			//Spicetify.showNotification("path: " + location.pathname);
 		}
 
+		if (location.pathname.startsWith("/artist") == false)
+		{
+			// unf. these CSS snippets need to be removed since their blocking power is too broad and also block various other images on the history and queue page
+			
+			// Turn off the mutationobserver.
+			playlistImageObserver.disconnect();
+
+
+			if (document.body.contains(styleToHideTopBackgroundImageOnArtistPage))
+			{
+				document.body.removeChild(styleToHideTopBackgroundImageOnArtistPage);
+			}
+			if (document.body.contains(styleToHideBottomBackgroundImageOnArtistPage))
+			{
+				document.body.removeChild(styleToHideBottomBackgroundImageOnArtistPage);
+			}
+			if (document.body.contains(styleToHideArtistAvatarOnArtistPage))
+			{
+				document.body.removeChild(styleToHideArtistAvatarOnArtistPage);
+			}
+		}
 		if (location.pathname.startsWith("/search") == false)
 		{
 			// don't listen to keystrokes outside of the search page because it would just lag the app for no reason.
 			document.documentElement.removeEventListener("input", documentKeyStrokeEventListener);
 		}
+	}
+
+	function processElementsBatch(selector, pageType)
+	{
+		// Ami most jön az a search page-re vonatkozik de azon belül csak a kiemelt találatra.
+		const targetElements = document.querySelectorAll(selector);
+
+		// Process any existing elements on initial setup
+		for (const element of targetElements)
+		{
+			processElement(element, pageType);
+		}
+	}
+
+	setTimeout(() =>
+	{
+		insertObservers();
+
+	}
+		, 2000);
+
+	console.log("HideImages extension initialized");
+
+	// "appchange" when user changes page.
 
 
-		// location.pathname érték példák:
-		// /queue
-		// /history
-		// /album/dasj9dasjasd234
-		// /artist/dasj9dasjasd234
-		// /artist/4kYSro6naA4h99UJvo89HB/discography/album
-		//this is the "discography" page (the event only fires if you change to this from a non /artist/ page e.g. the home page. )
-		// /playlist/dasj9dasjasd234
-		// /collection/tracks
-		// this is the "liked songs" page.
-		// /collection/local-files
-		// /search
-		// /search/what you typed
-		// (the event only fires when you visit the Search page and then also when you start typing something, (only your first search), but not afterwards.)
+	//Spicetify.Player.addEventListener("appchange", ({ data: data }) =>
+	Spicetify.Platform.History.listen((location) =>
+	{
+		// Log the current pathname every time the user navigates to a new page.
+		//console.log(location.pathname);
 
+		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.uri
+		// és
+		// 2024-02-02 mostantól ez a helyes mód: Spicetify.Player.data.context.url
+		// ne, várj, ez nem jó, ez a jelenleg szóló zenéről szól, nem a jelenlegi lapról.
 
-		// const uri = `spotify:artist:${data.uri.split(":")[3]}`;
+		//console.log("[info] URL aka location.pathname has changed: " + location.pathname);
 
-		//Spicetify.showNotification(location.pathname);
+		//if (data.isEmbeddedApp === true) return;
+		// if (location.pathname !== "queue") return;
+
+		// igazából ez is valid:
+		// const location = Spicetify.Platform.History.location;
+		// f: https://spicetify.app/docs/development/api-wrapper/methods/platform/
+
+		tryToSanitizePage();
+
 
 
 		//const {Type} = Spicetify.URI;
@@ -1313,7 +1539,6 @@
 		trashbinIcon,
 		async (self) =>
 		{
-
 			let albumUri = Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack.metadata.album_uri;
 			//console.log ("debug, albumUri: "+ albumUri);
 
@@ -1361,7 +1586,7 @@
 					document.body.removeChild(styleToHideNowPlayingTrackCoverArtImage);
 				}
 
-				Spicetify.showNotification("Album removed from trashbin");
+				Spicetify.showNotification("Album REMOVED from trashbin", true, 4000);
 			}
 
 			putDataLocal();
@@ -1415,6 +1640,7 @@
 			migrateKey("TrashAlbumList", "HideImages_TrashAlbumList");
 			migrateKey("TrashSongList", "HideImages_TrashSongList");
 			migrateKey("TrashArtistList", "HideImages_TrashArtistList");
+			migrateKey("TrashPlaylistList", "HideImages_TrashPlaylistList");
 
 			// Mark migration as complete
 			Spicetify.LocalStorage.set(migrationKey, "true");
@@ -1426,6 +1652,7 @@
 			Spicetify.LocalStorage.remove("TrashSongList");
 			Spicetify.LocalStorage.remove("TrashAlbumList");
 			Spicetify.LocalStorage.remove("TrashArtistList");
+			Spicetify.LocalStorage.remove("TrashPlaylistList");
 		}
 	};
 
@@ -1433,9 +1660,12 @@
 	// LocalStorage Setup
 	// I realized TrashSongList and TrashArtistList shouldn't be used because trashbin.js uses them too (TrashAlbumList is used by them but we should rename that one as well). We should migrate data over to another storage key and mark in the storage that we have done this act and it the mark is present, avoid doing this act again.
 	migrateStorage();
-	let trashAlbumList = initValue("HideImages_TrashAlbumList", new Map());
 	let trashSongList = initValue("HideImages_TrashSongList", {});
 	let trashArtistList = initValue("HideImages_TrashArtistList", {});
+	let trashAlbumList = initValue("HideImages_TrashAlbumList", new Map());
+
+	// Add trashPlaylistList similar to trashArtistList
+	let trashPlaylistList = initValue("HideImages_TrashPlaylistList", {});
 	//console.log(trashAlbumList);
 	//console.log(trashSongList);
 	//console.log(trashArtistList);
@@ -1462,71 +1692,89 @@
 		async ([uri], [uid] = [], context = undefined) =>
 		{
 			const type = uri.split(":")[1];
-			let meta;
 			switch (type)
 			{
 				case Spicetify.URI.Type.ALBUM:
-					meta = await fetchAlbum(uri);
-					break;
-				//case Spicetify.URI.Type.ARTIST:
-				//meta = await fetchArtist(uri);
-				//break;
-				//case Spicetify.URI.Type.SHOW:
-				//meta = await fetchShow(uri);
-				//break;
-				//case Spicetify.URI.Type.EPISODE:
-				//meta = await fetchEpisode(uri);
-				//break;
-				//case Spicetify.URI.Type.PLAYLIST:
-				//case Spicetify.URI.Type.PLAYLIST_V2:
-				//meta = await fetchPlaylist(uri);
-				//break;
+					{
+						let meta = await fetchAlbum(uri);
+
+						const foundElement = trashAlbumList.has(meta.uri);
+
+						if (!foundElement)
+						{
+							//trashAlbumList[meta.title] = true;
+
+							const album = new AlbumData();
+
+							album.uri = meta.uri;
+							album.title = meta.title;
+							album.imageUrls = meta.imageUrls;
+							album.artistNameList = meta.artistNameList;
+
+							//let album = {
+							//"uri": meta.uri,
+							//"title": meta.title,
+							//"imageUrls": meta.imageUrls
+							//}
+
+							trashAlbumList.set(meta.uri, album);
+
+
+							document.body.appendChild(styleToHideCoverArtImageOnAnAlbumPage);
+							Spicetify.showNotification("Album added to trashbin " + meta.title);
+						}
+						else
+						{
+							trashAlbumList.delete(meta.uri);
+
+							//trashAlbumList.remove(foundElement);
+							//const index = trashAlbumList.indexOf(foundElement);
+							//delete trashAlbumList[index];
+							// az a baj ezzel hogy lesz egy nullpointer benne az arrayban a delete után. Istenem hogy ez a nyelv mekkora egy fos.
+
+
+							setWidgetState(false);
+							if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage))
+							{
+								document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
+							}
+							Spicetify.showNotification("Album REMOVED from trashbin", true, 4000);
+							// I tried <b>removed</b> and <strong> and <em> and <i> in the formatting and didn't work, despite the Spicetify page citing that example.
+							// https://spicetify.app/docs/development/api-wrapper/functions/show-notification/
+						}
+						putDataLocal(); // save the state.
+						break;
+					}
+				case Spicetify.URI.Type.PLAYLIST:
+				case Spicetify.URI.Type.PLAYLIST_V2:
+					{
+						let meta = await fetchPlaylist(uri);
+
+						const foundElement = trashPlaylistList[uri];
+
+						if (!foundElement)
+						{
+							trashPlaylistList[uri] = true;
+
+							document.body.appendChild(styleToHideCoverArtImageOnAnAlbumPage);
+							Spicetify.showNotification("Playlist added to trashbin: " + meta.title);
+						}
+						else
+						{
+							delete trashPlaylistList[uri];
+
+							setWidgetState(false);
+							if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage))
+							{
+								document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
+							}
+							Spicetify.showNotification("Playlist REMOVED from trashbin", true, 4000);
+						}
+						putDataLocal();
+						break;
+					}
 			}
 			//LIST.addToStorage(meta);
-
-			const foundElement = trashAlbumList.has(meta.uri);
-
-			if (!foundElement)
-			{
-				//trashAlbumList[meta.title] = true;
-
-				const album = new AlbumData();
-
-				album.uri = meta.uri;
-				album.title = meta.title;
-				album.imageUrls = meta.imageUrls;
-				album.artistNameList = meta.artistNameList;
-
-				//let album = {
-				//"uri": meta.uri,
-				//"title": meta.title,
-				//"imageUrls": meta.imageUrls
-				//}
-
-				trashAlbumList.set(meta.uri, album);
-
-
-				document.body.appendChild(styleToHideCoverArtImageOnAnAlbumPage);
-				Spicetify.showNotification("Album added to trashbin " + meta.title);
-			}
-			else
-			{
-				trashAlbumList.delete(meta.uri);
-
-				//trashAlbumList.remove(foundElement);
-				//const index = trashAlbumList.indexOf(foundElement);
-				//delete trashAlbumList[index];
-				// az a baj ezzel hogy lesz egy nullpointer benne az arrayban a delete után. Istenem hogy ez a nyelv mekkora egy fos.
-
-
-				setWidgetState(false);
-				if (document.body.contains(styleToHideCoverArtImageOnAnAlbumPage))
-				{
-					document.body.removeChild(styleToHideCoverArtImageOnAnAlbumPage);
-				}
-				Spicetify.showNotification("Album removed from trashbin");
-			}
-			putDataLocal(); // save the state.
 		},
 		([uri]) =>
 		{
@@ -1539,8 +1787,15 @@
 				//case Spicetify.URI.Type.ARTIST:
 				//case Spicetify.URI.Type.SHOW:
 				//case Spicetify.URI.Type.EPISODE:
-				//case Spicetify.URI.Type.PLAYLIST:
-				//case Spicetify.URI.Type.PLAYLIST_V2:
+				case Spicetify.URI.Type.PLAYLIST:
+					console.debug("PLAYLIST_V1:");
+					console.debug(uri);
+					return true;
+				case Spicetify.URI.Type.PLAYLIST_V2:
+					console.debug("PLAYLIST_V2:");
+					console.debug(uri);
+					return true;
+
 				//case Spicetify.URI.Type.DAILY_MIX:
 				//case Spicetify.URI.Type.TOPLIST:
 				//case Spicetify.URI.Type.GENRE:
@@ -1557,7 +1812,7 @@
 		false
 	).register();
 
-	// This is to sanitize the home page the very first time Spotify open.
+	// This is to sanitize the homepage the very first time Spotify opens.
 	tryToSanitizePage();
 
 	const fetchAlbum = async uri =>
@@ -1762,12 +2017,16 @@
 			Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack?.uri === uri && setWidgetState(true);
 			// note: Trashbin.js seems to do this a bit differently. https://github.com/spicetify/cli/blob/main/Extensions/trashbin.js
 			Spicetify.showNotification(type === Spicetify.URI.Type.TRACK ? "Song added to trashbin" : "Artist added to trashbin");
+
+			tryToSanitizePage();
 		}
 		else
 		{
 			delete list[uri];
 			Spicetify.Platform.PlayerAPI._queue._queue.track.contextTrack?.uri === uri && setWidgetState(false);
-			Spicetify.showNotification(type === Spicetify.URI.Type.TRACK ? "Song removed from trashbin" : "Artist removed from trashbin");
+			Spicetify.showNotification(type === Spicetify.URI.Type.TRACK ? "Song REMOVED from trashbin" : "Artist REMOVED from trashbin", true, 4000);
+
+			tryToSanitizePage();
 		}
 
 		putDataLocal();
@@ -1819,18 +2078,13 @@
 
 		Spicetify.LocalStorage.set("HideImages_TrashAlbumList", mapToString(trashAlbumList));
 
-
 		Spicetify.LocalStorage.set("HideImages_TrashSongList", objectToString(trashSongList));
 		Spicetify.LocalStorage.set("HideImages_TrashArtistList", objectToString(trashArtistList));
-		Spicetify.LocalStorage.set(HideImages_config_version_dbkey, "1.9");
+		Spicetify.LocalStorage.set("HideImages_TrashPlaylistList", objectToString(trashPlaylistList));
+		Spicetify.LocalStorage.set(HideImages_config_version_dbkey, "2.0");
 	}
 	async function exportItems2()
 	{
-		const data = {
-			songs: trashSongList,
-			artists: trashArtistList,
-		};
-
 		try
 		{
 			const handle = await window.showSaveFilePicker({
@@ -1847,14 +2101,7 @@
 
 			const writable = await handle.createWritable();
 
-			const data = {
-				songs: objectToString(trashSongList),
-				artists: objectToString(trashArtistList),
-				albums: mapToString(trashAlbumList),
-				configVersion: "1.9"
-			};
-
-			await writable.write(JSON.stringify(data, null, "\t"));
+			await writable.write(await exportItems_Helper());
 			await writable.close();
 
 			Spicetify.showNotification("Backup saved succesfully.");
@@ -1863,24 +2110,76 @@
 			Spicetify.showNotification("Failed to save, try copying trashbin contents to clipboard and creating a backup manually.");
 		}
 	}
-	function exportItems()
+	async function exportItems_Helper()
 	{
-		// Igazából ezt úgy kéne, hogy magát a localstorage-ben lévő JSON stringet rakja a songs, artists és albums objektum alá és azt importálja és exportálja és egyesével parse-olja be a három JSON string-et. Egyszerűbb lenne a kód. -> szerintem kész.
-
 		const data = {
 			songs: objectToString(trashSongList),
 			artists: objectToString(trashArtistList),
 			albums: mapToString(trashAlbumList),
-			configVersion: "1.9"
+			playlists: objectToString(trashPlaylistList),
+			configVersion: "2.0"
 		};
-		Spicetify.Platform.ClipboardAPI.copy(JSON.stringify(data, null, "\t"));
+		return JSON.stringify(data, null, "\t");
+		// return 'dsaasdDSA'; // -> ez sem működik, a clipboardra ez kerül fel: {} ja megvan mi a baj: nem await -eltem ezen függvényt -.- Istenem.
+	}
+	async function exportItems()
+	{
+		// Igazából ezt úgy kéne, hogy magát a localstorage-ben lévő JSON stringet rakja a songs, artists és albums objektum alá és azt importálja és exportálja és egyesével parse-olja be a három JSON string-et. Egyszerűbb lenne a kód. -> szerintem kész.
+
+		await Spicetify.Platform.ClipboardAPI.copy(await exportItems_Helper());
+		// await Spicetify.Platform.ClipboardAPI.copy(exportItems_Helper()); -> this line doesn't even allow the extension to run. -> ja azt írja, hogy az await-et csak async függvényekben használhatom
 
 		//Spicetify.LocalStorage.set("TrashAlbumList", JSON.stringify(Array.from(trashAlbumList.entries())));
 
+		// Spicetify.showNotification(await exportItems_Helper());
 		Spicetify.showNotification("Copied to clipboard");
+	}
+	function importItems_Helper(importFrom)
+	{
+		try
+		{
+			const data = JSON.parse(importFrom);
+			if (data.configVersion !== undefined)
+			{
+				if (data.configVersion === "2.0")
+				{
+					trashSongList = objectFromString(data.songs);
+					trashArtistList = objectFromString(data.artists);
+					//trashAlbumList = new Map(data.albums);
+					trashAlbumList = mapFromString(data.albums);
+					trashPlaylistList = objectFromString(data.playlists);
+				}
+				else if (data.configVersion === "1.9")
+				{
+					trashSongList = objectFromString(data.songs);
+					trashArtistList = objectFromString(data.artists);
+					//trashAlbumList = new Map(data.albums);
+					trashAlbumList = mapFromString(data.albums);
+					trashPlaylistList = {};
+				}
+			}
+			else // config version is 1.8. Do something.
+			{
+				trashSongList = data.songs;
+				trashArtistList = data.artists;
+				trashAlbumList = new Map(data.albums);
+			}
+			putDataLocal();
+			Spicetify.showNotification("File Import Successful!");
+			console.log(`trashSongList: ${Object.keys(trashSongList).length}`)
+			console.log(`trashArtistList: ${Object.keys(trashArtistList).length}`)
+			console.log(`trashAlbumList: ${trashAlbumList.size}`)
+			console.log(`trashPlaylistList: ${Object.keys(trashPlaylistList).length}`)
+		}
+		catch (ex)
+		{
+			Spicetify.showNotification("File Import Failed!", true);
+			console.error(ex);
+		}
 	}
 	function importItems()
 	{
+		// Create a file chooser for nim to choose a .json file.
 		const input = document.createElement("input");
 		input.type = "file";
 		input.accept = ".json";
@@ -1890,36 +2189,7 @@
 			const reader = new FileReader();
 			reader.onload = e =>
 			{
-				try
-				{
-					const data = JSON.parse(e.target.result);
-					if (data.configVersion !== undefined)
-					{
-						if (data.configVersion === "1.9")
-						{
-							trashSongList = objectFromString(data.songs);
-							trashArtistList = objectFromString(data.artists);
-							//trashAlbumList = new Map(data.albums);
-							trashAlbumList = mapFromString(data.albums);
-						}
-					}
-					else // config version is 1.8. Do something.
-					{
-						trashSongList = data.songs;
-						trashArtistList = data.artists;
-						trashAlbumList = new Map(data.albums);
-					}
-					putDataLocal();
-					Spicetify.showNotification("File Import Successful!");
-					console.log(`trashSongList: ${Object.keys(trashSongList).length}`)
-					console.log(`trashArtistList: ${Object.keys(trashArtistList).length}`)
-					console.log(`trashAlbumList: ${trashAlbumList.size}`)
-				}
-				catch (ex)
-				{
-					Spicetify.showNotification("File Import Failed!", true);
-					console.error(ex);
-				}
+				importItems_Helper(e.target.result);
 			};
 			reader.onerror = () =>
 			{
@@ -1932,36 +2202,7 @@
 	}
 	function importDefaultItems()
 	{
-		try
-		{
-			const data = JSON.parse(defaultBlockListJSONString);
-			if (data.configVersion !== undefined)
-			{
-				if (data.configVersion === "1.9")
-				{
-					trashSongList = objectFromString(data.songs);
-					trashArtistList = objectFromString(data.artists);
-					//trashAlbumList = new Map(data.albums);
-					trashAlbumList = mapFromString(data.albums);
-				}
-			}
-			else // config version is 1.8. Do something.
-			{
-				trashSongList = data.songs;
-				trashArtistList = data.artists;
-				trashAlbumList = new Map(data.albums);
-			}
-			putDataLocal();
-			Spicetify.showNotification("Import Successful!");
-			console.log(`trashSongList: ${Object.keys(trashSongList).length}`)
-			console.log(`trashArtistList: ${Object.keys(trashArtistList).length}`)
-			console.log(`trashAlbumList: ${trashAlbumList.size}`)
-		}
-		catch (e)
-		{
-			Spicetify.showNotification("Import Failed!", true);
-			console.error(e);
-		}
+		importItems_Helper(defaultBlockListJSONString);
 	}
 })();
 
