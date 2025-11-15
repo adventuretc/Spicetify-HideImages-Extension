@@ -1020,8 +1020,8 @@
 			}
 			else if (mutation.type === "characterData")
 			{
-				console.log("DEBUG: does this ever happen?--1");
-				console.log("DEBUG: " + record);
+				// console.log("DEBUG: does this ever happen?--1"); -> I did a test run and this line was never called. So we can remove characterData from the observer. – 2025-06-21
+				// console.log("DEBUG: " + record);
 
 				const element = mutation.target.parentElement;
 
@@ -1089,7 +1089,8 @@
 			childList: true,
 			subtree: true,
 			attributes: true,
-			characterData: true
+			// characterData: true
+			characterData: false
 		}); // ez nem jó mert a src attribútumot én megmásítom rajta és akkor végtelen loop-ba kerül ez a cucc. Más megoldás kéne. Vagy ignorálni kell a src változásokat. Erre létezik attributeFilter amúgy
 
 		//https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/disconnect
